@@ -1,0 +1,322 @@
+---
+title: "Dynamic Programming"
+description: "150+ DP solutions organized by sub-type — the most-tested topic in coding interviews."
+---
+
+Dynamic Programming is the single most-tested topic in coding interviews at top companies. The repository contains **150+ DP solutions** organized into focused sub-categories so you can study patterns systematically rather than treating each problem as a one-off.
+
+<Note>
+  The standard progression for any DP problem is: **recursion → memoization (top-down) → tabulation (bottom-up) → space optimization**. Always start with the recursive solution to nail the recurrence, then optimize.
+</Note>
+
+## Sub-topics
+
+<AccordionGroup>
+  <Accordion title="1-D DP — Fibonacci-style and linear state">
+    Problems where `dp[i]` depends only on a fixed number of previous states. Great starting point for DP beginners.
+
+    - Climbing Stairs
+    - Fibonacci Number
+    - House Robber
+    - House Robber II
+    - Min Cost Climbing Stairs
+    - Longest Arithmetic Subsequence of Given Difference
+    - Maximum Alternating Subsequence Sum
+    - Maximum Total Damage With Spell Casting
+    - Taking Maximum Energy From the Mystic Dungeon
+  </Accordion>
+
+  <Accordion title="DP on Grids — 2-D path and region problems">
+    State is a cell `(i, j)`. Transitions move right, down, or diagonally.
+
+    - Unique Paths
+    - Unique Paths II
+    - Minimum Path Sum
+    - Dungeon Game
+    - Count Square Submatrices with All Ones
+    - Number of Ways to Paint N × 3 Grid
+    - Maximum Non Negative Product in a Matrix
+    - Paths in Matrix Whose Sum Is Divisible by K
+  </Accordion>
+
+  <Accordion title="DP on Strings — edit distance, LCS, palindromes">
+    Two-string DP where `dp[i][j]` represents some property of prefixes `s1[0..i]` and `s2[0..j]`.
+
+    - Longest Common Subsequence
+    - Edit Distance
+    - Delete Operation for Two Strings
+    - Distinct Subsequences
+    - Interleaving String
+    - Longest Common Substring
+    - Longest Palindromic Subsequence
+    - Longest Palindromic Substring
+    - Palindromic Substrings
+    - Minimum ASCII Delete Sum for Two Strings
+    - Shortest Common Supersequence
+    - Palindrome Partitioning II
+  </Accordion>
+
+  <Accordion title="LIS & Variants — Longest Increasing Subsequence">
+    Patience-sorting and binary search tricks reduce naïve O(n²) to O(n log n).
+
+    - Longest Increasing Subsequence
+    - Number of Longest Increasing Subsequence
+    - Largest Divisible Subset
+    - Maximum Length of Pair Chain
+    - Russian Doll Envelopes
+    - Longest String Chain
+    - Longest Ideal Subsequence
+    - Minimum Number of Removals to Make Mountain Array
+    - Delete Columns to Make Sorted III
+    - Maximum Balanced Subsequence Sum
+  </Accordion>
+
+  <Accordion title="Knapsack Series — 0/1 and subset problems">
+    The classic knapsack family. Every variant reduces to choosing items under a capacity constraint.
+
+    - 0/1 Knapsack (Recursive, Bottom-Up, Space-Optimised)
+    - Partition Equal Subset Sum
+    - Last Stone Weight II
+    - Ones and Zeroes
+    - Target Sum
+    - Coin Change
+    - Coin Change II
+    - Cutting a Rod
+    - Minimum Sum Partition
+  </Accordion>
+
+  <Accordion title="MCM / Interval DP — Matrix Chain Multiplication">
+    Problems where you split an interval `[i, j]` at some pivot `k` and combine sub-results.
+
+    - Matrix Chain Multiplication (3 approaches)
+    - Minimum Score Triangulation of Polygon
+    - Burst Balloons
+    - Minimum Cost to Cut a Stick
+    - Strange Printer
+    - Remove Boxes
+  </Accordion>
+
+  <Accordion title="Bitmask DP — exponential state over subsets">
+    State encodes which items have been used as a bitmask. Useful when n ≤ 20.
+
+    - Smallest Sufficient Team
+    - Maximize Score After N Operations
+    - Find the Shortest Superstring
+  </Accordion>
+
+  <Accordion title="Game Strategy DP — two-player optimal play">
+    Min-max style DP where both players play optimally.
+
+    - Stone Game
+    - Stone Game II
+    - Stone Game III
+    - Stone Game VII
+    - Predict the Winner
+    - Optimal Strategy For A Game
+    - Maximum Number of Moves to Kill All Pawns
+  </Accordion>
+
+  <Accordion title="Digit DP — counting numbers with digit constraints">
+    Count integers in a range `[L, R]` satisfying some digit-level property.
+
+    - Maximize the Number of Partitions After Operations
+    - Find Sum of Array Product of Magical Sequences
+  </Accordion>
+</AccordionGroup>
+
+## Key Problems to Study
+
+<CardGroup cols={2}>
+  <Card title="Climbing Stairs" icon="stairs" href="topics/dynamic-programming">
+    Foundational Fibonacci DP. Asked by Google, Amazon, Microsoft, Adobe, Flipkart.
+  </Card>
+  <Card title="Longest Common Subsequence" icon="code-compare" href="topics/dynamic-programming">
+    Core two-string DP. Asked by Microsoft, Amazon, FactSet, VMWare.
+  </Card>
+  <Card title="Edit Distance" icon="pen-to-square" href="topics/dynamic-programming">
+    Classic string DP with insert, delete, replace transitions.
+  </Card>
+  <Card title="Coin Change" icon="coins" href="topics/dynamic-programming">
+    Canonical unbounded knapsack. Must-know for interviews.
+  </Card>
+  <Card title="Word Break" icon="font" href="topics/dynamic-programming">
+    1-D DP on a string with dictionary lookup.
+  </Card>
+  <Card title="Partition Equal Subset Sum" icon="scale-balanced" href="topics/dynamic-programming">
+    0/1 knapsack reframed as a yes/no decision problem.
+  </Card>
+  <Card title="House Robber" icon="house" href="topics/dynamic-programming">
+    Non-adjacent selection — the archetype of 1-D DP.
+  </Card>
+  <Card title="Burst Balloons" icon="circle" href="topics/dynamic-programming">
+    Hard interval DP. Reverse-thinking is the key insight.
+  </Card>
+</CardGroup>
+
+## Code: Climbing Stairs
+
+**Company Tags:** Google, Amazon, OYO Rooms, Microsoft, Adobe, Flipkart, Siemens
+
+Three progressively optimized approaches — all from the repo.
+
+<Tabs>
+  <Tab title="Memoization (Top-Down)">
+    ```cpp
+    // T.C: O(n)  S.C: O(n)
+    class Solution {
+    public:
+        int t[46];
+        int solve(int n) {
+            if (n == 0 || n == 1 || n == 2)
+                return n;
+            if (t[n] != -1)
+                return t[n];
+            return t[n] = solve(n - 1) + solve(n - 2);
+        }
+        int climbStairs(int n) {
+            memset(t, -1, sizeof(t));
+            return solve(n);
+        }
+    };
+    ```
+  </Tab>
+  <Tab title="Bottom-Up Tabulation">
+    ```cpp
+    // T.C: O(n)  S.C: O(n)
+    class Solution {
+    public:
+        int climbStairs(int n) {
+            if (n == 1 || n == 2) return n;
+            vector<int> t(n + 1);
+            t[0] = 0; t[1] = 1; t[2] = 2;
+            for (int i = 3; i <= n; i++)
+                t[i] = t[i - 1] + t[i - 2];
+            return t[n];
+        }
+    };
+    ```
+  </Tab>
+  <Tab title="Space-Optimized O(1)">
+    ```cpp
+    // T.C: O(n)  S.C: O(1)
+    class Solution {
+    public:
+        int climbStairs(int n) {
+            if (n == 1 || n == 2 || n == 3) return n;
+            int a = 1, b = 2, c = 3;
+            for (int i = 3; i <= n; i++) {
+                c = a + b;
+                int temp_b = b;
+                b = c;
+                a = temp_b;
+            }
+            return c;
+        }
+    };
+    ```
+  </Tab>
+</Tabs>
+
+## Code: Longest Common Subsequence
+
+**Company Tags:** Microsoft, Amazon, FactSet, Hike, Citrix, MakeMyTrip, Paytm, VMWare
+
+<Tabs>
+  <Tab title="Memoization (Top-Down)">
+    ```cpp
+    // T.C: O(m*n)  S.C: O(m*n)
+    class Solution {
+    public:
+        int t[1001][1001];
+        int LCS(string& s1, string& s2, int m, int n) {
+            if (m == 0 || n == 0)
+                return t[m][n] = 0;
+            if (t[m][n] != -1)
+                return t[m][n];
+            if (s1[m - 1] == s2[n - 1])
+                return t[m][n] = 1 + LCS(s1, s2, m - 1, n - 1);
+            return t[m][n] = max(LCS(s1, s2, m, n - 1), LCS(s1, s2, m - 1, n));
+        }
+        int longestCommonSubsequence(string text1, string text2) {
+            int m = text1.length(), n = text2.length();
+            memset(t, -1, sizeof(t));
+            return LCS(text1, text2, m, n);
+        }
+    };
+    ```
+  </Tab>
+  <Tab title="Bottom-Up Tabulation">
+    ```cpp
+    // T.C: O(m*n)  S.C: O(m*n)
+    class Solution {
+    public:
+        int longestCommonSubsequence(string text1, string text2) {
+            int m = text1.length(), n = text2.length();
+            vector<vector<int>> t(m + 1, vector<int>(n + 1));
+            for (int i = 0; i <= m; i++) {
+                for (int j = 0; j <= n; j++) {
+                    if (i == 0 || j == 0)
+                        t[i][j] = 0;
+                    else if (text1[i - 1] == text2[j - 1])
+                        t[i][j] = 1 + t[i - 1][j - 1];
+                    else
+                        t[i][j] = max(t[i][j - 1], t[i - 1][j]);
+                }
+            }
+            return t[m][n];
+        }
+    };
+    ```
+  </Tab>
+  <Tab title="Space-Optimized O(n)">
+    ```cpp
+    // T.C: O(m*n)  S.C: O(n)  — only two rows needed
+    class Solution {
+    public:
+        int longestCommonSubsequence(string text1, string text2) {
+            int m = text1.length(), n = text2.length();
+            vector<vector<int>> t(2, vector<int>(n + 1));
+            for (int i = 0; i <= m; i++) {
+                for (int j = 0; j <= n; j++) {
+                    if (i == 0 || j == 0)
+                        t[i % 2][j] = 0;
+                    else if (text1[i - 1] == text2[j - 1])
+                        t[i % 2][j] = 1 + t[(i + 1) % 2][j - 1];
+                    else
+                        t[i % 2][j] = max(t[i % 2][j - 1], t[(i + 1) % 2][j]);
+                }
+            }
+            return t[m % 2][n];
+        }
+    };
+    ```
+  </Tab>
+</Tabs>
+
+## Study Tips
+
+<Tip>
+  Always derive the recurrence on paper first. If you cannot express `f(n)` in terms of smaller subproblems, you are not ready to code yet.
+</Tip>
+
+<Tip>
+  For any new DP problem: identify **what changes** between recursive calls — that is your state. Anything that changes is a dimension of your DP table.
+</Tip>
+
+<Tip>
+  Space optimization is almost always possible when `dp[i]` depends only on `dp[i-1]` (1-D → O(1)) or when a 2-D table only reads the previous row (2-D → O(n)).
+</Tip>
+
+## Related Topics
+
+<CardGroup cols={3}>
+  <Card title="Backtracking" icon="rotate-left" href="topics/backtracking">
+    Understand exhaustive search before adding memoization
+  </Card>
+  <Card title="Greedy" icon="bolt" href="topics/greedy">
+    Some DP problems have greedy solutions — know when each applies
+  </Card>
+  <Card title="Recursion" icon="repeat" href="topics/recursion">
+    Every DP solution starts as a recursive one
+  </Card>
+</CardGroup>

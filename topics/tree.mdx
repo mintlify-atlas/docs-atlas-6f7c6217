@@ -1,0 +1,172 @@
+---
+title: 'Trees'
+description: 'Binary trees, BSTs, N-ary trees, traversals, LCA, path sums, tree DP, and views — 100+ solutions covering the most-tested tree problems in FAANG interviews.'
+keywords: ['binary tree', 'BST', 'LCA', 'tree traversal', 'tree DP', 'inorder', 'preorder', 'postorder', 'Morris traversal', 'path sum']
+---
+
+Trees are among the most-tested DSA topics in software engineering interviews. The repository contains **100+ tree solutions** covering binary trees, binary search trees, N-ary trees, and every traversal variant you are likely to encounter.
+
+## Sub-topics
+
+<CardGroup cols={2}>
+  <Card title="Binary Search Tree" icon="diagram-project" href="/topics/tree">
+    Insert, delete, search, validate BST, inorder successor, convert BST to Greater Tree, and BST iterator.
+  </Card>
+  <Card title="Tree Traversals" icon="route" href="/topics/tree">
+    Inorder, preorder, postorder, level-order (BFS), vertical order, diagonal, boundary, zigzag, and Morris traversal.
+  </Card>
+  <Card title="Lowest Common Ancestor" icon="git-merge" href="/topics/tree">
+    LCA in binary tree, BST, and deepest leaves — the single most-asked tree pattern in FAANG interviews.
+  </Card>
+  <Card title="Path Sum Problems" icon="arrow-right-to-line" href="/topics/tree">
+    Path Sum I/II/III, Binary Tree Maximum Path Sum, root-to-leaf paths, and paths with specified sum.
+  </Card>
+  <Card title="Tree Construction" icon="hammer" href="/topics/tree">
+    Build trees from inorder+postorder, preorder+inorder, preorder+postorder, parent arrays, and string descriptions.
+  </Card>
+  <Card title="Tree Views" icon="eye" href="/topics/tree">
+    Left view, right view, top view, bottom view — all iterative and recursive variants.
+  </Card>
+  <Card title="Tree DP" icon="code-branch" href="/topics/tree">
+    Diameter, distribute coins, maximum product of split, count good nodes, and subtree-based DP.
+  </Card>
+  <Card title="N-Ary Trees" icon="sitemap" href="/topics/tree">
+    N-Ary tree traversals, serialization, and LCA on multi-child trees.
+  </Card>
+</CardGroup>
+
+## Key problems
+
+| Problem | Pattern | Companies |
+|---------|---------|-----------|
+| Binary Tree Maximum Path Sum | Tree DP | Amazon, Google, Meta |
+| Lowest Common Ancestor | DFS / recursion | Accolite, Amazon, Microsoft, Twitter |
+| Serialize and Deserialize Binary Tree | BFS / DFS | Amazon, Google |
+| Validate Binary Search Tree | Inorder / bounds | Amazon, Microsoft |
+| Vertical Order Traversal | BFS + sorting | Google, Meta |
+| Diameter of Binary Tree | Tree DP | Amazon, Meta |
+| Binary Tree Right Side View | BFS level-order | Amazon, Meta |
+| Morris Traversal | Inorder O(1) space | Microsoft |
+
+## Code example — Lowest Common Ancestor
+
+The LCA problem is a classic DFS recursion. When the current node matches either `p` or `q`, return it immediately. If both left and right subtrees return a non-null value, the current node is the LCA.
+
+**Companies:** Accolite, Amazon, American Express, Expedia, MakeMyTrip, Microsoft, Payu, Snapdeal, Times Internet, Twitter
+
+```cpp
+// Approach: DFS (postorder)
+// T.C : O(n)   — visits every node once
+// S.C : O(n)   — system stack for recursion
+
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (!root)
+            return NULL;
+
+        if (root->val == p->val || root->val == q->val)
+            return root;
+
+        TreeNode* l = lowestCommonAncestor(root->left,  p, q);
+        TreeNode* r = lowestCommonAncestor(root->right, p, q);
+
+        if (l && r)
+            return root;   // p and q are in different subtrees
+
+        return l ? l : r;  // one subtree contains both
+    }
+};
+```
+
+<Tip>
+The three-line structure — recurse left, recurse right, then decide — is the foundation for almost every tree DP problem. Master it and the rest of the patterns follow naturally.
+</Tip>
+
+## Problem groups
+
+<AccordionGroup>
+  <Accordion title="BST-specific problems">
+    BST problems exploit the ordering invariant: left subtree values are smaller, right subtree values are larger.
+
+    | Problem | Key insight |
+    |---------|-------------|
+    | Validate Binary Search Tree | Track valid `(min, max)` range per node |
+    | Inorder Successor in BST | Leftmost node in right subtree, or first ancestor where you came from left |
+    | Lowest Common Ancestor of a BST | Navigate left/right using BST ordering |
+    | Convert BST to Greater Tree | Reverse inorder (right → root → left) with running sum |
+    | Recover Binary Search Tree | Morris traversal or inorder to detect the two swapped nodes |
+    | Binary Search Tree Iterator | Simulate inorder with a stack |
+    | Find the Closest Element in BST | Binary search exploiting BST order |
+    | Increasing Order Search Tree | Inorder traversal + re-link |
+
+    All BST problems run in **O(h)** time (h = tree height), which is O(log n) for balanced trees and O(n) worst-case.
+  </Accordion>
+
+  <Accordion title="Tree construction problems">
+    Tree construction problems ask you to rebuild a tree from one or more traversal sequences.
+
+    | Problem | Inputs needed |
+    |---------|---------------|
+    | Construct from Preorder + Inorder | Preorder root splits inorder into left/right subtrees |
+    | Construct from Inorder + Postorder | Postorder root splits inorder into left/right subtrees |
+    | Construct from Preorder + Postorder | Preorder[1] is root of left subtree; locate in postorder |
+    | Construct from Parent Array | BFS from root using parent[] array |
+    | Construct from String | Recursive parsing with parentheses |
+    | Create Binary Tree From Descriptions | HashMap of node values → TreeNode pointers |
+
+    <Note>
+    Inorder is mandatory for unique reconstruction from two traversals. Preorder + postorder alone does not guarantee a unique binary tree.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Tree DP problems">
+    Tree DP computes answers bottom-up: solve subproblems for children first, then combine at the parent.
+
+    | Problem | What to return from each node |
+    |---------|-------------------------------|
+    | Diameter of Binary Tree | Height; update global `ans` with `left + right` |
+    | Binary Tree Maximum Path Sum | Max gain from one side; update global `ans` with `left + node + right` |
+    | Maximum Product of Splitted Binary Tree | Subtree sum; check `sum * (total - sum)` |
+    | Distribute Coins in Binary Tree | Excess coins; moves = sum of absolute excesses |
+    | Count Good Nodes | Count of nodes ≥ max seen on path from root |
+    | Longest ZigZag Path | `(leftLen, rightLen)` pair; update global max |
+    | Count Nodes Equal to Average of Subtree | `(subtreeSum, count)` pair per node |
+
+    The typical template is:
+
+    ```cpp
+    int solve(TreeNode* node) {
+        if (!node) return 0;          // base case
+        int left  = solve(node->left);
+        int right = solve(node->right);
+        ans = max(ans, left + right); // update global answer
+        return 1 + max(left, right);  // return to parent
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Tips
+
+<Steps>
+  <Step title="Always start with the base case">
+    The base case for nearly every tree problem is `if (!root) return ...`. Decide the right return value (null, 0, false) before writing anything else.
+  </Step>
+  <Step title="Think recursively">
+    Assume the recursive function works correctly for subtrees. Write only what the current node needs to do with the answers from its children.
+  </Step>
+  <Step title="Identify the traversal order">
+    - **Preorder** (root → left → right): path problems, serialization.
+    - **Inorder** (left → root → right): BST problems (gives sorted order).
+    - **Postorder** (left → right → root): tree DP, height-based problems.
+    - **Level-order** (BFS): view problems, zigzag, row-level aggregations.
+  </Step>
+  <Step title="Use a global variable for the answer">
+    When the final answer spans across nodes (e.g., diameter, max path sum), maintain a global or reference variable updated during recursion and return a helper value (like height or gain) to the parent.
+  </Step>
+</Steps>
+
+<Info>
+Related topics: [Dynamic Programming](/topics/dynamic-programming) for tree DP patterns, [Recursion](/topics/recursion) for recursive thinking fundamentals, [Graph](/topics/graph) for tree-as-graph problems like distance queries.
+</Info>

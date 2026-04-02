@@ -1,0 +1,141 @@
+---
+title: "Arrays"
+description: "Comprehensive guide to array problems covering prefix sums, binary search, two pointers, sliding window, intervals, and more — with real examples from the repo."
+---
+
+Arrays are the foundation of nearly every coding interview. They appear in problems spanning prefix sums, sorting, searching, and complex simulation. Mastering the core patterns here unlocks solutions across linked lists, strings, and dynamic programming as well.
+
+## Sub-topics
+
+<CardGroup cols={2}>
+  <Card title="Prefix Sum / Cumulative Sum" icon="sigma">
+    Precompute running totals to answer range-sum queries in O(1). Covers subarray sum equals K, contiguous array, and grid-based prefix problems.
+  </Card>
+  <Card title="Binary Search" icon="magnifying-glass">
+    Apply binary search not just on sorted arrays but also on answer spaces. Includes problems like finding the duplicate number and element appearing more than 25% in sorted array.
+  </Card>
+  <Card title="Two Pointers" icon="arrows-left-right">
+    Use left/right pointers to reduce O(n²) brute-force down to O(n). Covers 3Sum, Container With Most Water, and Remove Duplicates from Sorted Array.
+  </Card>
+  <Card title="Sliding Window" icon="window">
+    Maintain a dynamic window over the array to track running conditions. Covers Maximum Erasure Value, Max Consecutive Ones III, and subarray problems.
+  </Card>
+  <Card title="Difference Array Technique" icon="plus-minus">
+    Apply range updates in O(1) using a difference array, then reconstruct the result with a prefix sum pass. Useful for interval-based modification problems.
+  </Card>
+  <Card title="Intervals" icon="arrows-left-right-to-line">
+    Merge, insert, and partition overlapping intervals. Covers problems like Partition Array into Disjoint Intervals and Maximize Area of Square Hole in Grid.
+  </Card>
+  <Card title="Simulation" icon="gears">
+    Directly model the described process step by step. Covers Snakes and Ladders, Pancake Sorting, and spiral/grid traversal problems.
+  </Card>
+  <Card title="2-D Array Problems" icon="table-cells">
+    Extend 1-D array techniques to matrices: transpose, find all groups of farmland, and 2-D prefix sums for submatrix queries.
+  </Card>
+</CardGroup>
+
+## Key Problems
+
+| Problem | Patterns | Companies |
+|---|---|---|
+| Two Sum | HashMap lookup | Zoho, Flipkart, Amazon, Microsoft, Google, Adobe |
+| Maximum Subarray | Kadane's Algorithm | MWare, Zoho, Amazon, Microsoft, Oracle, Visa, Walmart |
+| Product of Array Except Self | Prefix/suffix product | Apple, LinkedIn, Amazon, Facebook, Microsoft |
+| Trapping Rain Water | Two pointers / prefix max | Accolite, Adobe, Amazon, Microsoft, MakeMyTrip |
+| Next Permutation | In-place array manipulation | Amazon, Microsoft |
+| Subarray Sum Equals K | Prefix sum + HashMap | Multiple top companies |
+| Sort Colors | Dutch National Flag / two pointers | Amazon, Microsoft |
+| First Missing Positive | In-place hashing | Amazon, Google |
+| Majority Element | Moore's Voting Algorithm | Amazon, Microsoft |
+| Maximum Sum Circular Subarray | Kadane's variant | Google, Amazon |
+| Find the Duplicate Number | Floyd's cycle / binary search | Amazon, Google, Microsoft |
+| Container With Most Water | Two pointers | Amazon, Google, Facebook |
+
+## Technique Patterns
+
+### HashMap-based O(n) Search — Two Sum
+
+The classic "complement lookup" pattern: store each element in a hashmap as you scan, and check whether the complement of the current element has already been seen.
+
+```cpp
+// T.C : O(n)   S.C : O(n)
+// Company Tags: Zoho, Flipkart, Amazon, Microsoft, Google, Adobe
+vector<int> twoSum(vector<int>& nums, int target) {
+    unordered_map<int, int> mp;
+
+    for (int i = 0; i < nums.size(); i++) {
+        if (mp.count(target - nums[i]))
+            return {mp[target - nums[i]], i};
+        mp[nums[i]] = i;
+    }
+
+    return {};
+}
+```
+
+### Kadane's Algorithm — Maximum Subarray
+
+The key insight: at each position, either extend the current subarray or start fresh from the current element — whichever is larger.
+
+```cpp
+// T.C : O(n)   S.C : O(1)
+// Company Tags: MWare, Zoho, Amazon, Microsoft, Oracle, Visa, Walmart
+int maxSubArray(vector<int>& nums) {
+    int sum    = nums[0];
+    int maxSum = nums[0];
+
+    for (int i = 1; i < nums.size(); i++) {
+        sum    = max(sum + nums[i], nums[i]);
+        maxSum = max(maxSum, sum);
+    }
+
+    return maxSum;
+}
+```
+
+### Prefix/Suffix Product — Product of Array Except Self
+
+Build a left-product array in one pass and accumulate the right product in a second pass — no division needed.
+
+```cpp
+// T.C : O(n)   S.C : O(1)  (output array not counted)
+// Company Tags: Apple, LinkedIn, Amazon, Facebook, Microsoft
+vector<int> productExceptSelf(vector<int>& nums) {
+    int n = nums.size();
+    vector<int> result(n);
+    result[0] = 1;
+
+    for (int i = 1; i < n; i++)
+        result[i] = result[i - 1] * nums[i - 1];
+
+    int right = 1;
+    for (int i = n - 1; i >= 0; i--) {
+        result[i] *= right;
+        right     *= nums[i];
+    }
+
+    return result;
+}
+```
+
+## Tips for Interviews
+
+<Tip>
+When asked for a subarray sum, prefix sums are almost always the right first move. Build a `prefixSum` array and use a hashmap to find if `prefixSum[j] - prefixSum[i] == target` in O(n).
+</Tip>
+
+<Tip>
+Two-pointer problems require the array to be sorted (or have a monotonic property). Always ask yourself: "can I sort first without violating constraints?" before reaching for O(n²) brute force.
+</Tip>
+
+<Tip>
+For "maximum subarray" variants (circular, with length divisible by K, etc.), always start from plain Kadane's and think about what boundary condition changes. The core `max(sum + nums[i], nums[i])` logic rarely changes.
+</Tip>
+
+<Tip>
+Difference arrays shine when you have many range-update queries followed by a single read pass. If you see "add value V to every index from L to R" repeated many times, reach for `diff[L] += V; diff[R+1] -= V;`.
+</Tip>
+
+<Tip>
+For 2-D grid problems, always check whether a 2-D prefix sum (summed over rows and columns) reduces the problem to O(1) per query from O(m*n).
+</Tip>

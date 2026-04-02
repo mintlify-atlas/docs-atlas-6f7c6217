@@ -1,0 +1,164 @@
+---
+title: "Line Sweep Technique"
+description: "Convert interval problems into sorted event streams — the sweep line technique solves scheduling, overlap counting, and booking problems in O(n log n)."
+---
+
+The line sweep (sweep line) technique transforms interval problems into a sequence of **events** sorted by time, then processes them left to right. Instead of comparing every pair of intervals in O(n²), you collect start and end events, sort them once, and sweep through in O(n log n).
+
+<CardGroup cols={2}>
+  <Card title="Arrays" icon="table-columns" href="/topics/arrays">
+    Prerequisite: sorting and prefix sums
+  </Card>
+  <Card title="Heap / Priority Queue" href="/topics/heap" icon="layer-group">
+    Alternative: heap-based interval scheduling
+  </Card>
+  <Card title="Sliding Window" icon="window" href="/topics/sliding-window">
+    Related: active-count problems
+  </Card>
+  <Card title="Two Pointers" icon="left-right" href="/topics/two-pointers">
+    Related: sorted pointer merge on events
+  </Card>
+</CardGroup>
+
+---
+
+## Core Algorithm
+
+<Steps>
+  <Step title="Create events">
+    For each interval `[start, end]`, emit two events:
+    - `+1` at `start` (a new interval begins)
+    - `−1` at `end` (an interval ends)
+
+    ```cpp
+    map<int, int> events;
+    for (int i = 0; i < n; i++) {
+        events[start[i]]++;  // interval opens
+        events[end[i]]--;    // interval closes
+    }
+    ```
+  </Step>
+  <Step title="Sort events by time">
+    Using a `map<int, int>` automatically keeps events in sorted key order. If using a plain array of pairs, sort by time (break ties by putting end events before start events when overlap at boundary matters).
+  </Step>
+  <Step title="Sweep through events tracking current count">
+    Process events in time order, maintaining a running counter of how many intervals are currently active.
+
+    ```cpp
+    int count = 0;
+    for (auto& [time, delta] : events) {
+        count += delta;
+        // count = number of active intervals at 'time'
+    }
+    ```
+  </Step>
+  <Step title="Track maximum count seen">
+    The answer to "maximum overlapping intervals" is the peak value of `count` during the sweep.
+
+    ```cpp
+    int result = 0, count = 0;
+    for (auto& [time, delta] : events) {
+        count  += delta;
+        result = max(result, count);
+    }
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Key Problems
+
+<CardGroup cols={2}>
+  <Card title="Meeting Rooms II" icon="calendar" href="/topics/line-sweep">
+    Minimum rooms needed — Amazon, Uber, Meta
+  </Card>
+  <Card title="Car Pooling" icon="car" href="/topics/line-sweep">
+    Capacity constraint over time — Amazon
+  </Card>
+  <Card title="My Calendar I / II / III" icon="calendar-days" href="/topics/line-sweep">
+    Progressive booking difficulty — Google
+  </Card>
+  <Card title="Corporate Flight Bookings" icon="plane" href="/topics/line-sweep">
+    Difference array variant — bulk range updates
+  </Card>
+  <Card title="Maximum Population Year" icon="people-group" href="/topics/line-sweep">
+    Birth/death event sweep — straightforward starter
+  </Card>
+  <Card title="Describe the Painting" icon="paintbrush" href="/topics/line-sweep">
+    Coordinate compression + event sweep
+  </Card>
+</CardGroup>
+
+---
+
+## Worked Example: Meeting Rooms II
+
+> **Company Tags:** Amazon, Uber, Meta
+
+Given a set of meeting intervals, find the **minimum number of conference rooms** required to hold all meetings simultaneously.
+
+This is the canonical line sweep problem: the answer is the **maximum number of meetings active at any single point in time**.
+
+```cpp
+// Company Tags: Amazon, Uber, Meta
+// Leetcode: https://leetcode.com/problems/meeting-rooms-ii/
+// GfG:      https://www.geeksforgeeks.org/problems/attend-all-meetings-ii/1
+
+// T.C : O(n log n)   S.C : O(n)
+class Solution {
+public:
+    int minMeetingRooms(vector<int>& start, vector<int>& end) {
+        int n = start.size();
+
+        // Step 1: create events — +1 for start, -1 for end
+        map<int, int> events;
+        for (int i = 0; i < n; i++) {
+            events[start[i]]++;  // a meeting starts: need one more room
+            events[end[i]]--;    // a meeting ends:   one room freed
+        }
+
+        // Steps 2–4: sort is implicit in map; sweep and track peak
+        int result = 0;
+        int count  = 0;
+        for (auto& p : events) {
+            count  += p.second;
+            result = max(result, count);
+        }
+
+        return result;
+    }
+};
+```
+
+**Walkthrough** with `intervals = [[0,30],[5,10],[15,20]]`:
+
+| Time | Event | Active count |
+|------|-------|-------------|
+| 0 | +1 (meeting 1 starts) | 1 |
+| 5 | +1 (meeting 2 starts) | 2 |
+| 10 | −1 (meeting 2 ends) | 1 |
+| 15 | +1 (meeting 3 starts) | 2 |
+| 20 | −1 (meeting 3 ends) | 1 |
+| 30 | −1 (meeting 1 ends) | 0 |
+
+Peak = **2** rooms required.
+
+<Note>
+  The `map` automatically sorts events by time. When a start and end event share the same timestamp, the `map` merges their deltas — the combined delta correctly reflects the net change at that time point.
+</Note>
+
+---
+
+## Technique Variations
+
+| Variation | Approach |
+|-----------|----------|
+| Maximum overlap count | Sweep, track `max(count)` |
+| Is overlap-free? | Check if `max(count) <= 1` |
+| Bulk range update | Difference array: `arr[l]++`, `arr[r+1]--`, then prefix sum |
+| Weighted intervals | Store weight in event, track weighted sum |
+
+<Tip>
+  Any problem asking "how many X are active at time T" or "what is the peak concurrent Y" is a candidate for line sweep. The technique works for passenger counts, network connections, overlapping rectangles, and population peaks — not just meeting rooms.
+</Tip>

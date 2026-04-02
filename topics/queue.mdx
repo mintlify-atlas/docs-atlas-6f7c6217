@@ -1,0 +1,152 @@
+---
+title: "Queue"
+description: "Queue patterns including BFS simulation, circular queue mechanics, monotonic deque for sliding window maximum, and queue-stack interplay — with real examples from the repo."
+---
+
+The queue enforces FIFO ordering and is the natural data structure for level-order BFS, sliding-window maximum, and any problem where the earliest-inserted element must be processed first. The repo covers foundational queue problems alongside a rich set of BFS-based tree and graph problems that rely on the same mental model.
+
+## Sub-topics
+
+<CardGroup cols={2}>
+  <Card title="BFS with Queue" icon="diagram-project">
+    Breadth-first search processes nodes level by level using a queue. BFS appears in tree level-order traversal, shortest-path problems, and multi-source reachability.
+  </Card>
+  <Card title="Circular Queue" icon="rotate">
+    A fixed-size ring buffer avoids costly memory shifts. Understanding the modular index arithmetic (`j = (j+1) % n`) is key for simulation problems like Reveal Cards in Increasing Order.
+  </Card>
+  <Card title="Monotonic Deque (Sliding Window Max)" icon="chart-line">
+    A double-ended queue that evicts elements from the back when they are smaller than the incoming element gives O(1) access to the maximum inside any window. Core pattern for Sliding Window Maximum.
+  </Card>
+  <Card title="Queue + Stack Interplay" icon="arrows-up-down">
+    Combining a queue and a stack lets you reverse a prefix of the queue in O(k) time (Reverse First K Elements). The two-stack queue design gives amortized O(1) enqueue and dequeue.
+  </Card>
+</CardGroup>
+
+## Key Problems
+
+| Problem | Pattern | Companies |
+|---|---|---|
+| Reveal Cards in Increasing Order | Circular queue simulation | — |
+| Reverse First K Elements of Queue | Stack + queue | Amazon |
+| Implement Queue using Stacks | Two-stack design | Amazon, Google, Microsoft |
+| Sliding Window Maximum | Monotonic deque | Amazon, Google, Uber |
+
+## Technique Patterns
+
+### Queue-based Simulation — Reveal Cards in Increasing Order
+
+Sort the deck, then use a queue of indices to simulate the "reveal-and-cycle" process. At each step, dequeue the front index, assign the next card, then cycle the new front index to the back.
+
+```cpp
+// T.C : O(n log n)   S.C : O(n)
+vector<int> deckRevealedIncreasing(vector<int>& deck) {
+    int n = deck.size();
+    queue<int> que;
+    vector<int> result(n);
+
+    // fill queue with position indices 0..n-1
+    for (int i = 0; i < n; i++)
+        que.push(i);
+
+    sort(begin(deck), end(deck));
+
+    for (int i = 0; i < n; i++) {
+        // place the next smallest card at the front position
+        result[que.front()] = deck[i];
+        que.pop();
+
+        // cycle the new front index to the back
+        if (!que.empty()) {
+            que.push(que.front());
+            que.pop();
+        }
+    }
+
+    return result;
+}
+```
+
+### Reverse First K Elements — Stack + Queue
+
+Push the first `k` elements onto a stack (reversing their order), push them back to the rear of the queue, then cycle the remaining `n-k` elements to restore their relative position.
+
+```cpp
+// T.C : O(n)   S.C : O(k)
+// Company Tags: Amazon
+queue<int> modifyQueue(queue<int> q, int k) {
+    int remaining = q.size() - k;
+    stack<int> st;
+
+    // reverse first k elements via stack
+    while (k--) {
+        st.push(q.front());
+        q.pop();
+    }
+    while (!st.empty()) {
+        q.push(st.top());
+        st.pop();
+    }
+
+    // cycle the remaining elements to the back
+    while (remaining--) {
+        q.push(q.front());
+        q.pop();
+    }
+
+    return q;
+}
+```
+
+### Monotonic Deque — Sliding Window Maximum
+
+Maintain a deque of indices in decreasing order of their array values. Before adding a new index, pop from the back any indices whose values are smaller than the current element (they can never be the maximum). The front of the deque is always the maximum of the current window.
+
+```cpp
+// T.C : O(n)   S.C : O(k)
+// Pattern used in: Sliding Window Maximum, Jump Game VI, and more
+vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+    int n = nums.size();
+    deque<int> dq;   // stores indices, decreasing order of nums[i]
+    vector<int> result;
+
+    for (int i = 0; i < n; i++) {
+        // remove indices outside the window
+        if (!dq.empty() && dq.front() < i - k + 1)
+            dq.pop_front();
+
+        // maintain decreasing invariant
+        while (!dq.empty() && nums[dq.back()] < nums[i])
+            dq.pop_back();
+
+        dq.push_back(i);
+
+        // window is full — record maximum
+        if (i >= k - 1)
+            result.push_back(nums[dq.front()]);
+    }
+
+    return result;
+}
+```
+
+## Tips for Interviews
+
+<Tip>
+BFS problems that ask for the "minimum number of steps" or "shortest path" almost always use a queue. The queue guarantees that you explore all nodes at distance `d` before any node at distance `d+1`.
+</Tip>
+
+<Tip>
+For the monotonic deque (sliding window maximum) pattern, the deque stores **indices**, not values. This lets you easily check whether the front index has fallen outside the current window by comparing it to `i - k + 1`.
+</Tip>
+
+<Tip>
+The two-stack queue implementation (`Implement Queue using Stacks`) has amortized O(1) operations. When asked about worst-case complexity, clarify that a single dequeue can be O(n) but this happens at most once per element over its lifetime.
+</Tip>
+
+<Tip>
+Circular index arithmetic `j = (j + 1) % n` is the key to both circular queue problems and simulation problems like Reveal Cards in Increasing Order. Practice computing the correct modular expression before writing any other logic.
+</Tip>
+
+<Tip>
+When you need to reverse a portion of a queue, the cleanest approach is to dump the first `k` elements into a stack and push them back. Avoid popping and re-inserting in a loop that mixes counting with modular indexing — it is error-prone under pressure.
+</Tip>

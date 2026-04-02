@@ -1,0 +1,171 @@
+---
+title: "Heap / Priority Queue"
+description: "Master heap-based patterns for top-K problems, median finding, scheduling, and K-way merge using C++ priority_queue."
+---
+
+Heaps (priority queues) are essential when you need fast access to the minimum or maximum element of a dynamically changing collection. They power solutions to top-K, scheduling, streaming, and K-way merge problems — all common at FAANG interviews.
+
+<CardGroup cols={2}>
+  <Card title="Arrays" icon="table-columns" href="/topics/arrays">
+    Prerequisite: sorting and partitioning
+  </Card>
+  <Card title="Sliding Window" icon="window" href="/topics/sliding-window">
+    Related: window-based top-K variants
+  </Card>
+  <Card title="Dynamic Programming" icon="brain" href="/topics/dynamic-programming">
+    Related: DP + heap for scheduling
+  </Card>
+  <Card title="Design" icon="pen-ruler" href="/topics/design">
+    Related: Median from Data Stream
+  </Card>
+</CardGroup>
+
+---
+
+## C++ Priority Queue Syntax
+
+<Tabs>
+  <Tab title="Max Heap">
+    The default `priority_queue` is a **max-heap** — `top()` returns the largest element.
+
+    ```cpp
+    // Max-heap (default)
+    priority_queue<int> maxh;
+    maxh.push(3);
+    maxh.push(1);
+    maxh.push(5);
+    cout << maxh.top(); // 5
+
+    // Max-heap of pairs — sorted by first element descending
+    priority_queue<pair<int,int>> pq;
+    pq.push({10, 1});
+    pq.push({20, 2});
+    cout << pq.top().first; // 20
+    ```
+  </Tab>
+  <Tab title="Min Heap">
+    Use `greater<T>` as the comparator to create a **min-heap** — `top()` returns the smallest element.
+
+    ```cpp
+    // Min-heap
+    priority_queue<int, vector<int>, greater<int>> minh;
+    minh.push(3);
+    minh.push(1);
+    minh.push(5);
+    cout << minh.top(); // 1
+
+    // Min-heap of pairs — sorted by first element ascending
+    priority_queue<pair<int,int>,
+                   vector<pair<int,int>>,
+                   greater<pair<int,int>>> pq;
+    pq.push({10, 1});
+    pq.push({5, 2});
+    cout << pq.top().first; // 5
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Key Patterns
+
+### Top-K Problems
+
+Keep a **min-heap of size K** while iterating. When the heap exceeds K elements, pop the smallest. At the end, the heap holds the K largest elements.
+
+**Problems:** K Largest Elements, K Closest Points to Origin, Top K Frequent Elements, Top K Frequent Words
+
+### Median Finding (Two Heaps)
+
+Maintain a **max-heap for the lower half** and a **min-heap for the upper half**. Keep them balanced so the median is always at the tops.
+
+**Problem:** Find Median from Data Stream
+
+### Scheduling
+
+Use a **max-heap ordered by frequency or profit** to always pick the most valuable task/job available at the current time.
+
+**Problems:** Task Scheduler, Single-Threaded CPU, IPO, Maximum Subsequence Score
+
+### K-Way Merge
+
+Push the first element of each sorted list into a min-heap. Poll the minimum, then push the next element from the same list.
+
+**Problems:** Merge K Sorted Lists, Smallest Range Covering K Lists, Find K Pairs with Smallest Sums
+
+---
+
+## Key Problems
+
+<CardGroup cols={2}>
+  <Card title="Kth Largest Element in an Array" icon="arrow-up-9-1" href="/topics/heap">
+    Min-heap of size K — classic top-K template
+  </Card>
+  <Card title="Top K Frequent Elements" icon="chart-bar" href="/topics/heap">
+    Frequency map + min-heap of size K
+  </Card>
+  <Card title="Find Median from Data Stream" icon="wave-pulse" href="/topics/heap">
+    Two-heap approach for O(log n) insert
+  </Card>
+  <Card title="Reorganize String" icon="shuffle" href="/topics/heap">
+    Greedy with max-heap by character frequency
+  </Card>
+  <Card title="Single-Threaded CPU" icon="microchip" href="/topics/heap">
+    Event simulation with min-heap on processing time
+  </Card>
+  <Card title="Smallest Range Covering K Lists" icon="arrows-left-right" href="/topics/heap">
+    K-way merge tracking current range
+  </Card>
+</CardGroup>
+
+---
+
+## Worked Example: Kth Largest Element in an Array
+
+> **Company Tags:** Flipkart, VMWare, Accolite, Amazon, Microsoft, Snapdeal, ABCO, SAP Labs, Cisco, Rockstand
+
+**Approach 1 — Min-Heap of size K** `O(n log k)`
+
+Keep only K elements in a min-heap at all times. The root is always the Kth largest seen so far.
+
+```cpp
+// Company Tags: Flipkart, VMWare, Accolite, Amazon, Microsoft, Snapdeal, ABCO, SAP Labs, Cisco, Rockstand
+// Leetcode: https://leetcode.com/problems/kth-largest-element-in-an-array/
+
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        // min-heap keeps the K largest elements seen so far
+        priority_queue<int, vector<int>, greater<int>> minh;
+
+        for (int i : nums) {
+            minh.push(i);
+            if (minh.size() > k)
+                minh.pop(); // remove the smallest — keep top-K
+        }
+
+        return minh.top(); // smallest of the top-K = Kth largest
+    }
+};
+```
+
+**Why min-heap?** A min-heap of size K means the root is the *K*th largest. Any new element larger than the root displaces it, keeping the heap as the true top-K window.
+
+<Tip>
+  **Quick Select** (Approach 3 in the repo) solves this in `O(n)` average time using a partition scheme similar to quicksort. Use it when you only need the value, not the full sorted top-K.
+</Tip>
+
+---
+
+## Complexity Reference
+
+| Operation | Max-Heap / Min-Heap |
+|-----------|-------------------|
+| Push | O(log n) |
+| Pop | O(log n) |
+| Top (peek) | O(1) |
+| Build heap from array | O(n) |
+
+<Note>
+  `std::priority_queue` does **not** support random access or decrease-key in O(log n). For Dijkstra's algorithm or problems needing key updates, use a lazy-deletion pattern (push new pair, ignore stale entries when popping).
+</Note>

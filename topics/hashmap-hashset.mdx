@@ -1,0 +1,157 @@
+---
+title: "HashMap & HashSet"
+description: "O(1) average-case lookup, insert, and delete make hash-based structures the go-to tool for frequency counting, two-sum patterns, and consecutive sequence problems."
+---
+
+Hash-based data structures — `unordered_map`, `unordered_set`, `map`, `set` — are involved in a large fraction of medium and hard interview problems. Mastering when and how to use them unlocks fast solutions to problems that would otherwise require O(n²) brute force.
+
+<CardGroup cols={2}>
+  <Card title="Arrays" icon="table-columns" href="/topics/arrays">
+    Prerequisite: array traversal patterns
+  </Card>
+  <Card title="Sliding Window" icon="window" href="/topics/sliding-window">
+    Related: frequency maps in windows
+  </Card>
+  <Card title="Two Pointers" icon="left-right" href="/topics/two-pointers">
+    Related: complement lookups
+  </Card>
+  <Card title="Strings" icon="text-size" href="/topics/strings">
+    Related: anagram and pattern matching
+  </Card>
+</CardGroup>
+
+---
+
+## C++ Container Reference
+
+| Container | Ordering | Average Lookup | Use When |
+|-----------|----------|---------------|----------|
+| `unordered_map<K,V>` | None | O(1) | Frequency count, complement lookup |
+| `map<K,V>` | Sorted by key | O(log n) | Need sorted iteration or range queries |
+| `unordered_set<T>` | None | O(1) | Membership test, deduplication |
+| `set<T>` | Sorted | O(log n) | Need ordered set or lower_bound |
+
+<Note>
+  Hash containers use open addressing or chaining internally. In the **worst case** (many hash collisions), lookup degrades to **O(n)**. This can be exploited in competitive programming with adversarial inputs. Use a custom hash or fall back to `map` / `set` when worst-case guarantees matter.
+</Note>
+
+---
+
+## Key Patterns
+
+### Frequency Counting
+
+Build a frequency map in one pass, then reason about counts.
+
+```cpp
+unordered_map<char, int> freq;
+for (char c : s) freq[c]++;
+```
+
+**Problems:** Group Anagrams, Top K Frequent Elements, Reorganize String, Sort Characters By Frequency
+
+### Two Sum Pattern
+
+Store each element's **complement** (target − x) as you iterate. A single O(1) lookup per element gives an O(n) solution.
+
+```cpp
+unordered_map<int, int> seen; // value -> index
+for (int i = 0; i < nums.size(); i++) {
+    int complement = target - nums[i];
+    if (seen.count(complement))
+        return {seen[complement], i};
+    seen[nums[i]] = i;
+}
+```
+
+**Problems:** Two Sum, Two Sum II, 4Sum II, Find Two Non-Overlapping Sub-arrays
+
+### Sliding Window with Frequency Map
+
+Expand the window right, add to frequency map; shrink from left when the window violates the constraint, remove from map.
+
+**Problems:** Minimum Window Substring, Longest Substring Without Repeating Characters, Fruit Into Baskets
+
+### Longest Consecutive Sequence
+
+Store all numbers in a set. For each number that is a **sequence start** (no predecessor exists), walk forward counting the length. Total work is O(n) because each number is visited at most twice.
+
+---
+
+## Key Problems
+
+<CardGroup cols={2}>
+  <Card title="Two Sum" icon="plus" href="/topics/hashmap-hashset">
+    Complement lookup — the canonical hash map problem
+  </Card>
+  <Card title="Longest Consecutive Sequence" icon="arrow-trend-up" href="/topics/hashmap-hashset">
+    O(n) via set membership — Google, Amazon
+  </Card>
+  <Card title="Group Anagrams" icon="layer-group" href="/topics/hashmap-hashset">
+    Sorted string as key maps anagrams to same bucket
+  </Card>
+  <Card title="Word Pattern" icon="spell-check" href="/topics/hashmap-hashset">
+    Bidirectional mapping — isomorphism check
+  </Card>
+  <Card title="Isomorphic Strings" icon="right-left" href="/topics/hashmap-hashset">
+    Two maps to enforce bijection between characters
+  </Card>
+  <Card title="Find the Duplicate Number" icon="copy" href="/topics/hashmap-hashset">
+    Set-based O(n) detection
+  </Card>
+</CardGroup>
+
+---
+
+## Worked Example: Longest Consecutive Sequence
+
+> **Company Tags:** Google, Zoho, Amazon, Walmart, LinkedIn
+
+Given an unsorted array, find the length of the longest consecutive elements sequence in O(n) time.
+
+**Key insight:** Only start counting from a number `x` when `x-1` is **not** in the set. This ensures each sequence is counted exactly once from its true start.
+
+```cpp
+// Company Tags: Google, Zoho, Amazon, Walmart, LinkedIn
+// Leetcode: https://leetcode.com/problems/longest-consecutive-sequence/
+
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+        unordered_set<int> st(begin(nums), end(nums));
+
+        int maxL = 0;
+
+        for (const int& x : st) {
+            // Only start a new sequence from a sequence-start number
+            if (st.find(x - 1) != st.end()) {
+                continue; // x has a predecessor — not the start
+            }
+
+            int tempL = 1;
+            // Walk forward; each element visited at most once total → O(n)
+            while (st.find(x + tempL) != st.end()) {
+                tempL++;
+            }
+
+            maxL = max(maxL, tempL);
+        }
+
+        return maxL;
+    }
+};
+```
+
+**Why O(n)?** The inner `while` loop only runs for sequence-start numbers. Across all starts, the total number of iterations equals the total number of elements — O(n) overall.
+
+<Tip>
+  The `unordered_set` version above is cleaner than the `map<int,bool>` alternative (also in the repo) because you avoid storing a boolean flag — membership itself signals presence.
+</Tip>
+
+---
+
+## Common Mistakes
+
+- **Forgetting to handle duplicates** — when building a frequency map, duplicates naturally increment the count. When building a set, duplicates are silently ignored.
+- **Using `map` when `unordered_map` suffices** — costs O(log n) per operation instead of O(1); can cause TLE on large inputs.
+- **Modifying a container while iterating** — collect keys to erase first, then erase after the loop.

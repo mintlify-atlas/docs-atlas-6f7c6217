@@ -1,0 +1,146 @@
+---
+title: "Greedy"
+description: "Locally optimal choices that lead to globally optimal solutions — 65+ greedy problems from interval scheduling to task scheduling."
+---
+
+A greedy algorithm makes the locally optimal choice at each step and never revisits a decision. When a greedy strategy is correct, it is almost always faster than DP or backtracking. The challenge is **proving** that the greedy choice is safe — an exchange argument is the standard tool.
+
+The repository contains **65+ greedy solutions** spanning interval scheduling, array rearrangement, fractional optimization, and more.
+
+<Note>
+  Greedy is not always applicable. If the locally optimal choice can be invalidated by future choices, you need DP instead. The gas station and jump game problems are classic examples where greedy works; the coin change problem (arbitrary denominations) is a classic example where it does not.
+</Note>
+
+## Key Patterns
+
+<AccordionGroup>
+  <Accordion title="Interval scheduling — select maximum non-overlapping intervals">
+    Sort by end time. Always pick the interval that ends earliest — it leaves the most room for future intervals.
+
+    **Problems:** Non-overlapping Intervals, Minimum Number of Arrows to Burst Balloons, Meeting Rooms II, Earliest Possible Day of Full Bloom, Maximum Performance of a Team
+  </Accordion>
+
+  <Accordion title="Task / activity scheduling — minimize idle time">
+    Count task frequencies. The most frequent task determines the structure; fill idle slots with other tasks.
+
+    **Problems:** Task Scheduler, Reorganize String, Minimum Rounds to Complete All Tasks, Minimum Number of Operations to Make Array Empty
+  </Accordion>
+
+  <Accordion title="Array rearrangement — sort and scan">
+    Sort the array (often by a custom key), then make a single pass applying a greedy rule.
+
+    **Problems:** Candy, Jump Game, Gas Station, Boats to Save People, Minimize Maximum Pair Sum in Array, Maximize Happiness of Selected Children
+  </Accordion>
+
+  <Accordion title="Fractional / partial selection">
+    When you can take fractions of items, always take the highest-value-per-weight item first.
+
+    **Problems:** Fractional Knapsack, Maximum Average Pass Ratio, Maximum Bags With Full Capacity of Rocks
+  </Accordion>
+
+  <Accordion title="String manipulation — build lexicographically optimal result">
+    Decide character-by-character using a greedy rule based on character frequency or ordering.
+
+    **Problems:** Break a Palindrome, Optimal Partition of String, Smallest String With A Given Numeric Value, Minimum Time to Make Rope Colorful
+  </Accordion>
+</AccordionGroup>
+
+## Key Problems
+
+<CardGroup cols={2}>
+  <Card title="Jump Game" icon="person-running" href="topics/greedy">
+    Track the maximum reachable index as you scan left to right.
+  </Card>
+  <Card title="Gas Station" icon="gas-pump" href="topics/greedy">
+    One pass: if total gas ≥ total cost, a solution exists starting at the reset point.
+  </Card>
+  <Card title="Task Scheduler" icon="list-check" href="topics/greedy">
+    Idle slots = (max_freq - 1) × n. Fill with other tasks. Tags: Facebook.
+  </Card>
+  <Card title="Non-overlapping Intervals" icon="calendar-xmark" href="topics/greedy">
+    Sort by end time; greedily keep intervals that end earliest.
+  </Card>
+  <Card title="Minimum Number of Arrows to Burst Balloons" icon="bow-arrow" href="topics/greedy">
+    Each arrow at the earliest end point covers the maximum overlap.
+  </Card>
+  <Card title="Candy" icon="candy-bar" href="topics/greedy">
+    Two-pass greedy: left-to-right then right-to-left.
+  </Card>
+  <Card title="Boats to Save People" icon="ship" href="topics/greedy">
+    Two-pointer on sorted array — pair heaviest with lightest when possible.
+  </Card>
+  <Card title="Fractional Knapsack" icon="scale-unbalanced" href="topics/greedy">
+    Sort by value/weight ratio; take fractions when capacity runs out.
+  </Card>
+</CardGroup>
+
+## Code: Task Scheduler
+
+**Company Tags:** Facebook
+
+**T.C:** O(n log n) for sorting the frequency array (bounded by 26 characters → effectively O(1))
+**S.C:** O(1)
+
+```cpp
+class Solution {
+public:
+    int leastInterval(vector<char>& tasks, int p) {
+        int n = tasks.size();
+        if (p == 0) return n;
+
+        // Count frequency of each task
+        int counter[26] = {0};
+        for (char& ch : tasks)
+            counter[ch - 'A']++;
+
+        sort(begin(counter), end(counter));
+
+        // The most frequent task dictates the frame structure:
+        // [A _ _ ] [A _ _ ] [A]
+        // chunks      = max_freq - 1
+        // idle slots  = chunks * cooldown
+        int chunks    = counter[25] - 1;
+        int idleSpots = chunks * p;
+
+        // Fill idle slots greedily with remaining tasks (high freq first)
+        for (int i = 24; i >= 0; i--)
+            idleSpots -= min(chunks, counter[i]);
+
+        // If idle spots remain, we need padding; otherwise tasks fill the schedule
+        return idleSpots > 0 ? n + idleSpots : n;
+    }
+};
+```
+
+<Note>
+  The key insight: arrange the most-frequent task in `chunks` blocks separated by cooldown slots, then fill those slots with other tasks. If all slots are filled, the answer is simply `tasks.size()`.
+</Note>
+
+## Proving Greedy Correctness — Exchange Argument
+
+The standard proof technique: assume an optimal solution differs from the greedy solution at some position. Show that you can swap the greedy choice in without making the solution worse. Therefore the greedy solution is at least as good as any optimal solution.
+
+**Example — Non-overlapping Intervals:**
+Suppose an optimal solution picks interval A over the greedy choice B, where B ends before A. Both start after the same previous interval. Replacing A with B in the optimal solution cannot create new conflicts (B ends earlier, so it is strictly less restrictive). Therefore the greedy choice is safe.
+
+<Tip>
+  When you are unsure whether greedy applies, try small counter-examples first. If you find one, fall back to DP.
+</Tip>
+
+<Tip>
+  Many greedy problems require **sorting first**. The order in which you process elements is often the critical design decision.
+</Tip>
+
+## Related Topics
+
+<CardGroup cols={3}>
+  <Card title="Dynamic Programming" icon="table" href="topics/dynamic-programming">
+    DP is the fallback when greedy cannot be proved correct
+  </Card>
+  <Card title="Two Pointers" icon="left-right" href="topics/two-pointers">
+    Many greedy array problems use two pointers after sorting
+  </Card>
+  <Card title="Heap" icon="layer-group" href="topics/heap">
+    Priority queues power many greedy scheduling solutions
+  </Card>
+</CardGroup>

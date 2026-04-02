@@ -1,0 +1,97 @@
+---
+title: "How to use this repository"
+description: "A guide to the folder structure, solution file format, and a step-by-step study workflow for Interview DS Algo."
+---
+
+## Folder structure
+
+Each top-level folder is a topic. Inside, problems are grouped into sub-topics so you can focus on one technique at a time.
+
+```
+Interview_DS_Algo/
+├── Arrays/
+├── DP/
+│   ├── 1-D DP/
+│   ├── DP on Grids/
+│   └── LIS & Variants/
+├── Graph/
+├── Tree/
+├── Trie/
+├── Sliding Window/
+├── Two Pointers/
+├── Stack/
+├── Queue/
+├── Heap/
+├── Backtracking/
+├── Greedy/
+├── HashMap/
+├── HashSet/
+├── Bit_Magic/
+├── Recursion/
+├── Segment Tree/
+├── Line Sweep Technique/
+├── strings/
+├── Mathematical/
+└── Design/
+```
+
+## Anatomy of a solution file
+
+Every `.cpp` file follows the same structure. The header comment block at the top gives you everything you need before reading a single line of code:
+
+```cpp
+/*
+    MY YOUTUBE VIDEO ON THIS Qn : https://www.youtube.com/watch?v=TCaBnVIllrQ
+    Company Tags                : Zoho, Flipkart, Morgan Stanley, Accolite, Amazon,
+                                  Microsoft, FactSet, Hike, Adobe, Google, Wipro,
+                                  SAP Labs, CarWale
+    Leetcode Link               : https://leetcode.com/problems/two-sum/
+*/
+
+// T.C : O(n)
+// S.C : O(1)
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        // ...
+    }
+};
+```
+
+- **MY YOUTUBE VIDEO** — direct link to the Hinglish video walkthrough for this problem
+- **Company Tags** — every company known to have asked this problem in interviews
+- **Leetcode Link** — jump straight to the problem statement
+- **T.C / S.C** — time and space complexity of the approach, stated before the code
+
+Many files contain multiple approaches (e.g., brute force, memoization, bottom-up DP) written as separate `Solution` classes with their own complexity annotations.
+
+## How to study
+
+<Steps>
+  <Step title="Pick a topic folder">
+    Choose a folder that matches what you want to practice — for example, `DP/` for dynamic programming or `Graph/` for graph traversal problems.
+  </Step>
+  <Step title="Browse problems in that folder">
+    Open the sub-topic directories if they exist. Each `.cpp` file is one LeetCode problem. Start from problems you recognize or want to strengthen.
+  </Step>
+  <Step title="Note the company tags at the top of each file">
+    Before reading the solution, check which companies have asked this problem. This helps you prioritize if you have a specific interview coming up.
+  </Step>
+  <Step title="Try the problem yourself first">
+    Open the Leetcode link from the file header and attempt the problem without looking at the solution. Set a timer — 20–30 minutes is typical for medium difficulty.
+  </Step>
+  <Step title="Watch the YouTube video explanation if stuck">
+    Every file links directly to a video explanation. The videos cover intuition, dry runs, and multiple approaches in Hinglish, making them easy to follow even for complex problems.
+  </Step>
+  <Step title="Study the approach: brute force to optimal">
+    Read through the solution file from top to bottom. Approaches are ordered from simplest to most efficient. Understand *why* each optimization works, not just what changed.
+  </Step>
+</Steps>
+
+<Tip>
+  If you have an interview at a specific company, use company tags to build a focused study list. See [Company tags](/company-tags) for how to filter problems by company using `git grep`.
+</Tip>
+
+<Info>
+  Frequency tags are being added to solutions from a certain point onwards. When present, frequency indicates how often a problem has appeared in real interviews — useful for deciding what to prioritize.
+</Info>

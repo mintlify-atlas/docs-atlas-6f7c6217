@@ -1,0 +1,241 @@
+---
+title: "Backtracking"
+description: "Exhaustive search with pruning — 45+ problems covering permutations, combinations, subsets, and constraint satisfaction."
+---
+
+Backtracking is structured exhaustive search. You build a solution incrementally, and whenever a partial solution violates a constraint you **undo the last choice** (backtrack) and try the next option. The key insight is that pruning bad branches early — before they are fully explored — is what makes backtracking tractable.
+
+The repository contains **45+ backtracking solutions** covering every major pattern asked in interviews.
+
+<Note>
+  Backtracking is essentially DFS on a decision tree. Each node represents a partial solution; each edge is a choice. Pruning removes entire subtrees from consideration.
+</Note>
+
+## The Backtracking Template
+
+<Steps>
+  <Step title="Choose — make a decision">
+    Select the next element to add to your partial solution. This is the branching point of the decision tree.
+
+    ```cpp
+    for (int i = start; i < candidates.size(); i++) {
+        // skip invalid choices early (pruning)
+        if (shouldSkip(i)) continue;
+
+        // make the choice
+        current.push_back(candidates[i]);
+    ```
+  </Step>
+  <Step title="Explore — recurse into the subtree">
+    Recursively build on top of the current partial solution. This is the DFS descent.
+
+    ```cpp
+        // explore further with this choice
+        solve(i + 1, current, result, target);
+    ```
+  </Step>
+  <Step title="Unchoose — backtrack">
+    Remove the last choice and restore state so the next branch starts from the same clean slate.
+
+    ```cpp
+        // undo the choice (backtrack)
+        current.pop_back();
+    }
+    ```
+  </Step>
+</Steps>
+
+## Key Patterns
+
+<AccordionGroup>
+  <Accordion title="Permutations — all orderings of a set">
+    Every element can appear in every position. Use a `visited[]` array or swap-in-place to track what has been used.
+
+    **Problems:** Permutations, Permutations II (with duplicates), All Unique Permutations, Permutation with Spaces, Permutation with Case Change, Letter Tile Possibilities
+  </Accordion>
+
+  <Accordion title="Combinations — choose k from n">
+    Order does not matter. Iterate from `start` (not from `0`) to avoid re-using the same pair.
+
+    **Problems:** Combinations, Combination Sum, Combination Sum II, Combination Sum III, Combination Sum IV, Letter Combinations of a Phone Number
+  </Accordion>
+
+  <Accordion title="Subsets — power set enumeration">
+    At each element, choose to include it or not. Results in 2ⁿ subsets.
+
+    **Problems:** Subsets, Subsets II (with duplicates), Non-decreasing Subsequences, The Number of Beautiful Subsets, Maximum Score Words Formed by Letters
+  </Accordion>
+
+  <Accordion title="Constraint satisfaction — place elements under rules">
+    Board/grid problems where each placement must satisfy global constraints (rows, columns, diagonals, boxes).
+
+    **Problems:** N-Queens, N-Queens II, Sudoku Solver, Word Search, Unique Paths III, Path with Maximum Gold
+  </Accordion>
+
+  <Accordion title="String partitioning — split strings under conditions">
+    Recursively cut a string at every valid position and recurse on the remaining suffix.
+
+    **Problems:** Palindrome Partitioning, Word Break II, Split a String Into the Max Number of Unique Substrings, Expression Add Operators
+  </Accordion>
+
+  <Accordion title="Partition / grouping — divide array into k equal parts">
+    Assign each element to one of k groups and verify the partition is valid.
+
+    **Problems:** Partition to K Equal Sum Subsets, Matchsticks to Square, Fair Distribution of Cookies, Tug of War
+  </Accordion>
+</AccordionGroup>
+
+## Key Problems
+
+<CardGroup cols={2}>
+  <Card title="N-Queens" icon="chess-queen" href="topics/backtracking">
+    Constraint satisfaction on a chessboard. Tags: Accolite, Amazon, Google, Twitter.
+  </Card>
+  <Card title="Sudoku Solver" icon="table-cells" href="topics/backtracking">
+    Hard constraint satisfaction — prune by checking row, col, and 3×3 box.
+  </Card>
+  <Card title="Word Search" icon="magnifying-glass" href="topics/backtracking">
+    DFS on a 2-D grid with backtracking to unmark visited cells.
+  </Card>
+  <Card title="Generate Parentheses" icon="brackets-curly" href="topics/backtracking">
+    Count of open/close brackets is the pruning condition.
+  </Card>
+  <Card title="Combination Sum" icon="plus" href="topics/backtracking">
+    Reuse elements; prune when remaining target goes negative.
+  </Card>
+  <Card title="Palindrome Partitioning" icon="scissors" href="topics/backtracking">
+    Cut a string into all-palindrome parts — classic partition backtracking.
+  </Card>
+  <Card title="Letter Combinations of a Phone Number" icon="phone" href="topics/backtracking">
+    Map digits to letters and enumerate all 4-letter products.
+  </Card>
+  <Card title="Permutations" icon="shuffle" href="topics/backtracking">
+    Foundational permutation generation — must know before tackling harder variants.
+  </Card>
+</CardGroup>
+
+## Code: N-Queens
+
+**Company Tags:** Accolite, Amazon, Visa, MAQ Software, Amdocs, Twitter, Qualcomm, Google
+
+**T.C:** O(N!) — each successive queen has fewer valid columns available.
+**S.C:** O(N) for the result board.
+
+<Tabs>
+  <Tab title="Approach 1 — Direct validation">
+    Check up, left-diagonal, and right-diagonal above the current row before placing.
+
+    ```cpp
+    class Solution {
+    public:
+        vector<vector<string>> result;
+
+        bool isValid(vector<string>& board, int row, int col) {
+            // look straight up
+            for (int i = row; i >= 0; i--)
+                if (board[i][col] == 'Q') return false;
+            // check upper-left diagonal
+            for (int i = row, j = col; i >= 0 && j >= 0; i--, j--)
+                if (board[i][j] == 'Q') return false;
+            // check upper-right diagonal
+            for (int i = row, j = col; i >= 0 && j < (int)board.size(); i--, j++)
+                if (board[i][j] == 'Q') return false;
+            return true;
+        }
+
+        void solve(vector<string>& board, int row) {
+            if (row == (int)board.size()) {
+                result.push_back(board);
+                return;
+            }
+            for (int i = 0; i < (int)board.size(); i++) {
+                if (isValid(board, row, i)) {
+                    board[row][i] = 'Q';   // Choose
+                    solve(board, row + 1); // Explore
+                    board[row][i] = '.';   // Unchoose
+                }
+            }
+        }
+
+        vector<vector<string>> solveNQueens(int n) {
+            vector<string> board(n, string(n, '.'));
+            solve(board, 0);
+            return result;
+        }
+    };
+    ```
+  </Tab>
+  <Tab title="Approach 2 — Hash-set pruning (faster)">
+    Use sets for columns, diagonals (`row-col`), and anti-diagonals (`row+col`) for O(1) conflict checks.
+
+    ```cpp
+    class Solution {
+    public:
+        vector<vector<string>> result;
+
+        void solve(vector<string>& board, int row,
+                   unordered_set<int>& cols,
+                   unordered_set<int>& diags,
+                   unordered_set<int>& antiDiags) {
+            if (row == (int)board.size()) {
+                result.push_back(board);
+                return;
+            }
+            for (int col = 0; col < (int)board.size(); col++) {
+                int diag_id      = row - col;
+                int anti_diag_id = row + col;
+                if (cols.count(col) || diags.count(diag_id) || antiDiags.count(anti_diag_id))
+                    continue;
+
+                cols.insert(col);
+                diags.insert(diag_id);
+                antiDiags.insert(anti_diag_id);
+                board[row][col] = 'Q';                             // Choose
+
+                solve(board, row + 1, cols, diags, antiDiags);    // Explore
+
+                cols.erase(col);
+                diags.erase(diag_id);
+                antiDiags.erase(anti_diag_id);
+                board[row][col] = '.';                             // Unchoose
+            }
+        }
+
+        vector<vector<string>> solveNQueens(int n) {
+            vector<string> board(n, string(n, '.'));
+            unordered_set<int> cols, diags, antiDiags;
+            solve(board, 0, cols, diags, antiDiags);
+            return result;
+        }
+    };
+    ```
+  </Tab>
+</Tabs>
+
+## Study Tips
+
+<Tip>
+  **Pruning is everything.** Two solutions with identical logic but different pruning can differ by orders of magnitude in runtime. Always ask: "Can I reject this branch earlier?"
+</Tip>
+
+<Tip>
+  **Sort before backtracking** when the input contains duplicates (e.g., Combination Sum II, Subsets II, Permutations II). After sorting, skip duplicate elements at the same recursion depth with `if (i > start && candidates[i] == candidates[i-1]) continue;`
+</Tip>
+
+<Tip>
+  When generating permutations with a `visited[]` array, the cost is O(n!) which is unavoidable. For subset/combination problems you can avoid the visited array entirely by passing a `start` index.
+</Tip>
+
+## Related Topics
+
+<CardGroup cols={3}>
+  <Card title="Dynamic Programming" icon="table" href="topics/dynamic-programming">
+    Memoize backtracking calls to get DP
+  </Card>
+  <Card title="Recursion" icon="repeat" href="topics/recursion">
+    Backtracking is recursive DFS with state rollback
+  </Card>
+  <Card title="Graph" icon="diagram-project" href="topics/graph">
+    Many backtracking problems are DFS on implicit graphs
+  </Card>
+</CardGroup>

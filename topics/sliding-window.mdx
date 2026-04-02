@@ -1,0 +1,216 @@
+---
+title: "Sliding Window"
+description: "Reduce O(n²) substring and subarray problems to O(n) with fixed and variable-size window techniques — 55+ solutions."
+---
+
+The sliding window technique maintains a contiguous subarray or substring defined by two pointers (`i` and `j`). By expanding the right boundary and shrinking the left boundary under a condition, you visit each element at most twice — turning O(n²) brute force into O(n).
+
+The repository contains **55+ sliding window solutions** covering both fixed-size and variable-size variants.
+
+<Note>
+  Sliding window only applies to problems where the answer is a **contiguous** subarray or substring. If the problem asks for subsequences (elements need not be adjacent), use DP or two pointers instead.
+</Note>
+
+## Two Window Patterns
+
+<Tabs>
+  <Tab title="Fixed-size window (size k)">
+    The window always has exactly `k` elements. Slide it one step at a time: add the new right element, remove the old left element.
+
+    **When to use:** "find max/min/sum/count in every subarray of size k"
+
+    ```cpp
+    // Template: fixed window of size k
+    int windowSum = 0;
+    for (int i = 0; i < k; i++)
+        windowSum += nums[i];          // build initial window
+
+    int result = windowSum;
+    for (int i = k; i < nums.size(); i++) {
+        windowSum += nums[i];          // expand right
+        windowSum -= nums[i - k];     // shrink left (drop outgoing element)
+        result = max(result, windowSum);
+    }
+    ```
+
+    **Problems in this pattern:**
+    - Maximum Sum of Distinct Subarrays With Length K
+    - Maximum Number of Vowels in a Substring of Given Length
+    - First Negative Integer in Every Window of Size k
+    - Grumpy Bookstore Owner
+    - K Radius Subarray Averages
+    - Find the Power of K-Size Subarrays I
+    - Sliding Window Maximum (use deque for O(1) max)
+  </Tab>
+  <Tab title="Variable-size window (shrinkable)">
+    The window grows right until a condition is violated, then shrinks from the left until it is valid again.
+
+    **When to use:** "find shortest/longest subarray/substring satisfying condition X"
+
+    ```cpp
+    // Template: variable window
+    int i = 0;
+    // maintain window state (e.g. a frequency map)
+    for (int j = 0; j < n; j++) {
+        // expand: include s[j] in window state
+        updateState(s[j]);
+
+        while (windowViolatesCondition()) {
+            // shrink: remove s[i] from window state
+            removeFromState(s[i]);
+            i++;
+        }
+
+        // window [i..j] is now valid — update answer
+        result = max(result, j - i + 1);
+    }
+    ```
+
+    **Problems in this pattern:**
+    - Minimum Window Substring
+    - Longest Substring Without Repeating Characters
+    - Longest K Unique Characters Substring
+    - Fruit Into Baskets
+    - Minimum Size Subarray Sum
+    - Subarray Product Less Than K
+    - Frequency of the Most Frequent Element
+  </Tab>
+</Tabs>
+
+## Problem List
+
+<AccordionGroup>
+  <Accordion title="Fixed-size window problems">
+    | Problem | Key Idea |
+    |---------|----------|
+    | Maximum Sum of Distinct Subarrays With Length K | Hash set to track distinct elements |
+    | Maximum Number of Vowels in a Substring of Given Length | Count vowels, slide |
+    | First Negative Integer in Every Window of Size k | Deque of indices |
+    | Sliding Window Maximum | Monotonic deque |
+    | Grumpy Bookstore Owner | Fixed window of unhappy customers |
+    | K Radius Subarray Averages | Prefix sum or sliding sum |
+    | Find the Power of K-Size Subarrays I | Track consecutive sorted runs |
+    | Count Occurrences of Anagrams | Frequency map comparison |
+    | Permutation in String | Anagram detection with fixed window |
+    | Minimum Swaps to Group All 1s Together | Count 1s in window of size = total 1s |
+  </Accordion>
+
+  <Accordion title="Variable-size window problems">
+    | Problem | Shrink condition |
+    |---------|-----------------|
+    | Minimum Window Substring | all t-chars covered |
+    | Longest Substring Without Repeating Characters | duplicate character entered window |
+    | Longest K Unique Characters Substring | distinct chars > k |
+    | Fruit Into Baskets | more than 2 distinct fruit types |
+    | Minimum Size Subarray Sum | sum ≥ target |
+    | Subarray Product Less Than K | product ≥ k |
+    | Longest Subarray of 1's After Deleting One Element | zeros in window > 1 |
+    | Maximize the Confusion of an Exam | minority character count > k |
+    | Max Consecutive Ones III | zeros in window > k |
+    | Count Number of Good Subarrays | pairs count ≥ k |
+    | Binary Subarrays With Sum | shrink when sum > goal |
+    | Subarrays with K Different Integers | exactly k = at most k − at most (k-1) |
+    | Length of Longest Subarray With at Most K Frequency | any frequency > k |
+    | Longest Continuous Subarray With Absolute Diff ≤ Limit | max−min > limit (use deques) |
+  </Accordion>
+
+  <Accordion title="Advanced and combined patterns">
+    | Problem | Notes |
+    |---------|-------|
+    | Minimum Window Substring | Classic variable window with frequency map |
+    | Sliding Window Maximum | Fixed window + monotonic deque |
+    | Shortest Subarray with Sum at Least K | Negative numbers — monotonic deque needed |
+    | Substring with Concatenation of All Words | Fixed window, each element is a word |
+    | Find All Anagrams in a String | Fixed window, frequency comparison |
+    | Subarrays with K Different Integers | Exactly-k via at-most-k trick |
+    | Count Subarrays With Fixed Bounds | Count valid subarrays using boundary tracking |
+    | Maximum Points You Can Obtain from Cards | Take from ends — reverse window in middle |
+    | Take K of Each Character From Left and Right | Reverse: minimize middle window |
+    | Count Substrings That Satisfy K-Constraint I & II | Parameterized shrink condition |
+    | Count Complete Subarrays in an Array | Distinct count = total distinct |
+  </Accordion>
+</AccordionGroup>
+
+## Code: Minimum Window Substring
+
+**Company Tags:** Google, Amazon, Microsoft, Codenation, FactSet, Atlassian, MakeMyTrip, Airbnb
+
+**T.C:** O(m + n) where m = `|s|`, n = `|t|`
+**S.C:** O(n) for the frequency map
+
+```cpp
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        int n = s.length();
+        map<char, int> mp;
+
+        // Record required character frequencies from t
+        for (char& ch : t)
+            mp[ch]++;
+
+        int requiredCount = t.length(); // characters still needed
+        int i = 0, j = 0;
+        int minStart  = 0;
+        int minWindow = INT_MAX;
+
+        while (j < n) {
+            char ch_j = s[j];
+
+            // Expanding right: if this char was needed, satisfy one requirement
+            if (mp[ch_j] > 0)
+                requiredCount--;
+            mp[ch_j]--;
+
+            // All required chars are in the window — try to shrink from left
+            while (requiredCount == 0) {
+                if (minWindow > j - i + 1) {
+                    minWindow = j - i + 1;
+                    minStart  = i;
+                }
+
+                char ch_i = s[i];
+                mp[ch_i]++;
+                // If removing s[i] breaks coverage, increment requiredCount
+                if (mp[ch_i] > 0)
+                    requiredCount++;
+                i++;
+            }
+
+            j++;
+        }
+
+        return minWindow == INT_MAX ? "" : s.substr(minStart, minWindow);
+    }
+};
+```
+
+## When to Shrink the Window
+
+<Tip>
+  Shrink the left pointer when the window **violates your constraint**. For minimization problems (shortest window), shrink as soon as the constraint is satisfied. For maximization problems (longest window), shrink when the constraint is violated.
+</Tip>
+
+| Goal | Shrink when |
+|------|-------------|
+| Shortest valid window | Constraint is satisfied — shrink to minimize length |
+| Longest valid window | Constraint is violated — shrink to restore validity |
+| Count valid windows | Depends on whether condition is "at most" or "exactly" |
+
+<Note>
+  **Exactly-k trick:** `count(exactly k) = count(at most k) − count(at most k−1)`. This converts an "exactly k" problem into two "at most k" sliding window runs.
+</Note>
+
+## Related Topics
+
+<CardGroup cols={3}>
+  <Card title="Two Pointers" icon="left-right" href="topics/two-pointers">
+    Sliding window is a specialized two-pointer technique for contiguous windows
+  </Card>
+  <Card title="Hashmap & Hashset" icon="hashtag" href="topics/hashmap-hashset">
+    Frequency maps are the primary state structure inside most windows
+  </Card>
+  <Card title="Arrays" icon="table-list" href="topics/arrays">
+    All sliding window problems operate on arrays or strings
+  </Card>
+</CardGroup>

@@ -1,0 +1,184 @@
+---
+title: 'Trie (Prefix Tree)'
+description: 'Insert, search, prefix matching, word search, autocomplete, and palindrome pairs — 15 solutions covering every major Trie pattern in coding interviews.'
+keywords: ['trie', 'prefix tree', 'insert', 'search', 'startsWith', 'word search', 'autocomplete', 'palindrome pairs', 'replace words']
+---
+
+A **Trie** (pronounced "try", also called a prefix tree) is a specialized tree data structure optimized for string operations. Each path from the root to a node spells out a prefix, making Tries ideal for prefix matching, autocomplete, and word-search problems.
+
+The repository contains **15 Trie solutions** covering the full range of problems you are likely to encounter.
+
+## How a Trie works
+
+Each node stores up to 26 child pointers (for lowercase English letters) and a boolean `isEndOfWord` flag. Inserting a word means walking (or creating) one node per character.
+
+```
+root
+├── a
+│   └── p
+│       └── p [END]
+│           └── l
+│               └── e [END]
+└── b
+    └── a
+        └── t [END]
+```
+
+The tree above stores "app", "apple", and "bat".
+
+## Sub-topics
+
+<CardGroup cols={2}>
+  <Card title="Insert & Search" icon="magnifying-glass" href="/topics/trie">
+    Core operations: insert a word in O(L), search for an exact word in O(L), and check prefix existence in O(L).
+  </Card>
+  <Card title="Prefix Matching" icon="magnifying-glass-arrow-right" href="/topics/trie">
+    `startsWith` queries, longest common prefix, prefix and suffix search.
+  </Card>
+  <Card title="Word Search" icon="book-open" href="/topics/trie">
+    Word Search II (multi-word grid search), replace words with root prefixes.
+  </Card>
+  <Card title="Advanced Patterns" icon="puzzle-piece" href="/topics/trie">
+    Palindrome pairs, sum of prefix scores, delete duplicate folders in a file system.
+  </Card>
+</CardGroup>
+
+## Key problems
+
+| Problem | Pattern | Difficulty |
+|---------|---------|-----------|
+| Implement Trie (Prefix Tree) | Core operations | Medium |
+| Word Search II | Trie + DFS on grid | Hard |
+| Replace Words | Shortest prefix lookup | Medium |
+| Palindrome Pairs | Reverse Trie + palindrome check | Hard |
+| Sum of Prefix Scores of Strings | Count passing words per prefix | Hard |
+| Prefix and Suffix Search | Trie with wrapped keys | Hard |
+| Find the Length of the Longest Common Prefix | Trie insert + query | Medium |
+| Delete Duplicate Folders in System | Trie serialization | Hard |
+
+## Code example — Implement Trie
+
+The canonical Trie implementation with insert, search, and startsWith. All three operations run in **O(L)** where L is the word length.
+
+**Company: Microsoft**
+
+```cpp
+// T.C: O(L) for insert, search, startsWith
+// S.C: O(N) total — N = total characters in all words
+class Trie {
+public:
+    struct trieNode {
+        trieNode* children[26];
+        bool isEndOfWord;
+    };
+
+    trieNode* getNode() {
+        trieNode* node = new trieNode();
+        node->isEndOfWord = false;
+        for (int i = 0; i < 26; i++)
+            node->children[i] = NULL;
+        return node;
+    }
+
+    trieNode* root;
+
+    Trie() {
+        root = getNode();
+    }
+
+    // Insert a word into the Trie
+    void insert(string word) {
+        trieNode* crawler = root;
+        for (int i = 0; i < word.length(); i++) {
+            int index = word[i] - 'a';
+            if (!crawler->children[index])
+                crawler->children[index] = getNode();
+            crawler = crawler->children[index];
+        }
+        crawler->isEndOfWord = true;
+    }
+
+    // Returns true if the exact word exists
+    bool search(string word) {
+        trieNode* crawler = root;
+        for (int i = 0; i < word.length(); i++) {
+            int index = word[i] - 'a';
+            if (!crawler->children[index])
+                return false;
+            crawler = crawler->children[index];
+        }
+        return crawler != NULL && crawler->isEndOfWord;
+    }
+
+    // Returns true if any word starts with the given prefix
+    bool startsWith(string prefix) {
+        trieNode* crawler = root;
+        for (int i = 0; i < prefix.length(); i++) {
+            int index = prefix[i] - 'a';
+            if (!crawler->children[index])
+                return false;
+            crawler = crawler->children[index];
+        }
+        return true;
+    }
+};
+```
+
+<Note>
+The `isEndOfWord` flag distinguishes between "app" being a valid word and merely a prefix of "apple". Without it, `search("app")` would incorrectly return true when only "apple" was inserted.
+</Note>
+
+## Trie vs HashMap
+
+<Tabs>
+  <Tab title="Use a Trie when...">
+    - You need **prefix matching** (`startsWith`).
+    - You need to find all words with a given prefix (autocomplete).
+    - You are searching across a grid for multiple words simultaneously (Word Search II).
+    - Memory is less of a concern than lookup speed for prefix queries.
+    - The problem involves **longest common prefix** across many strings.
+
+    ```cpp
+    // Example: check if any dictionary word is a prefix of a sentence word
+    // Trie handles this naturally with startsWith
+    trie.startsWith(sentenceWord.substr(0, k));
+    ```
+  </Tab>
+  <Tab title="Use a HashMap when...">
+    - You only need **exact word lookup** (no prefix queries).
+    - The alphabet is large or variable (not just 26 lowercase letters).
+    - You need to store associated values, not just presence/absence.
+    - The number of words is small and memory is constrained.
+
+    ```cpp
+    // Example: check if a word exists in a dictionary
+    unordered_set<string> dict(words.begin(), words.end());
+    dict.count(word);  // O(L) average
+    ```
+
+    <Tip>
+    Both a Trie and an `unordered_set` search in O(L). The Trie wins the moment you add prefix queries or need to enumerate words by prefix efficiently.
+    </Tip>
+  </Tab>
+</Tabs>
+
+## Tips
+
+<Steps>
+  <Step title="Use an array of 26 pointers, not a HashMap, for competitive coding">
+    `trieNode* children[26]` is faster in practice than `unordered_map<char, trieNode*>` due to cache locality and no hash overhead. Use a map only when the alphabet is very large or sparse.
+  </Step>
+  <Step title="The crawler pattern">
+    Always start a `crawler` pointer at `root` and walk it down character by character. Never move `root` itself.
+  </Step>
+  <Step title="Mark end of word, not the character">
+    The `isEndOfWord` flag lives on the **last character's node**, not on the character itself. This lets prefixes and full words share nodes.
+  </Step>
+  <Step title="For Word Search II, prune the Trie during DFS">
+    After finding a word, set `node->isEndOfWord = false` (and optionally clean up leaf nodes) to avoid reporting duplicates on subsequent DFS paths.
+  </Step>
+</Steps>
+
+<Info>
+Related topics: [Strings](/topics/strings) for string manipulation fundamentals, [Backtracking](/topics/backtracking) for Word Search II DFS grid traversal, [Hashmap & Hashset](/topics/hashmap-hashset) for exact-match alternatives.
+</Info>

@@ -1,0 +1,156 @@
+---
+title: "Stack"
+description: "Stack patterns including monotonic stack, parentheses problems, histogram area, and expression evaluation — with real examples from the repo."
+---
+
+The stack is one of the most versatile data structures for interview problems. Beyond basic LIFO usage, the **monotonic stack** pattern unlocks O(n) solutions to a wide class of "next greater / smaller element" and histogram problems that would otherwise be O(n²). The repo covers ~42 stack problems.
+
+## Sub-topics
+
+<CardGroup cols={2}>
+  <Card title="Monotonic Stack" icon="chart-bar">
+    Maintain a stack whose elements are always in increasing (or decreasing) order by popping elements that violate the invariant. This gives O(1) amortized access to the nearest smaller/larger element for every position.
+  </Card>
+  <Card title="Parentheses Problems" icon="brackets-curly">
+    Track unmatched opening brackets using a stack. Covers Valid Parentheses, Minimum Add to Make Valid, Minimum Removals to Balance, and Score of Parentheses.
+  </Card>
+  <Card title="Histogram / Area Problems" icon="chart-area">
+    Use the NSL/NSR (Next Smaller to Left/Right) monotonic stack technique to find the widest rectangle each bar can extend to. Directly solves Largest Rectangle in Histogram and Maximal Rectangle.
+  </Card>
+  <Card title="Expression Evaluation" icon="calculator">
+    Evaluate infix, prefix, or postfix expressions by pushing operands and applying operators in the right order. Covers Basic Calculator, Basic Calculator II, and Evaluate Reverse Polish Notation.
+  </Card>
+  <Card title="String Manipulation via Stack" icon="text-size">
+    Use a stack to remove adjacent duplicates, decode run-length encoded strings, and simplify directory paths. Covers Decode String, Remove All Adjacent Duplicates, and Simplify Path.
+  </Card>
+  <Card title="Simulation / Game Problems" icon="gamepad">
+    Model game states or collision rules with a stack. Covers Asteroid Collision, Robot Collisions, Baseball Game, and Online Stock Span.
+  </Card>
+</CardGroup>
+
+## Key Problems
+
+| Problem | Pattern | Companies |
+|---|---|---|
+| Largest Rectangle in Histogram | Monotonic stack (NSL/NSR) | Amazon, MAQ Software, Paytm, Snapdeal |
+| Trapping Rain Water | Monotonic stack | Accolite, Adobe, Amazon, Microsoft, MakeMyTrip |
+| Daily Temperatures | Monotonic stack (next greater) | Google, Meta, Tokopedia |
+| Valid Parentheses | Basic stack | Amazon, Google, Facebook, Microsoft |
+| Maximal Rectangle | Histogram on each row | Amazon, Microsoft, Google |
+| Basic Calculator | Expression evaluation | Google, Amazon |
+| Decode String | Stack-based parsing | Amazon, Google, Facebook |
+| Remove K Digits | Greedy monotonic stack | Google |
+| Sum of Subarray Minimums | Monotonic stack | Amazon, Google |
+| Online Stock Span | Monotonic stack | Amazon, Google |
+| 132 Pattern | Monotonic stack | Amazon, Google |
+| Asteroid Collision | Simulation stack | Amazon, Google |
+
+## Technique Patterns
+
+### Monotonic Stack — Daily Temperatures
+
+Scan from right to left, maintaining a stack of indices whose temperatures are still "waiting" for a warmer day. Pop indices that are cooler than the current temperature.
+
+```cpp
+// T.C : O(n)   S.C : O(n)
+// Company Tags: Google, Meta, Tokopedia
+vector<int> dailyTemperatures(vector<int>& temperatures) {
+    int n = temperatures.size();
+    stack<int> st;
+    vector<int> result(n);
+
+    for (int i = n - 1; i >= 0; i--) {
+        // pop all indices with temperature <= current
+        while (!st.empty() && temperatures[i] >= temperatures[st.top()])
+            st.pop();
+
+        result[i] = st.empty() ? 0 : st.top() - i;
+        st.push(i);
+    }
+
+    return result;
+}
+```
+
+### NSL / NSR Monotonic Stack — Largest Rectangle in Histogram
+
+For each bar, find the index of the next smaller bar to its left (NSL) and right (NSR) using two separate monotonic stack passes. The area for bar `i` is `heights[i] * (right[i] - left[i] - 1)`.
+
+```cpp
+// T.C : O(n)   S.C : O(n)
+// Company Tags: Amazon, MAQ Software, Paytm, Snapdeal
+int largestRectangleArea(vector<int>& heights) {
+    int n = heights.size();
+    stack<int> st;
+    int i = 0, maxArea = 0;
+
+    while (i < n) {
+        if (st.empty() || heights[i] >= heights[st.top()])
+            st.push(i++);
+        else {
+            int idx = st.top(); st.pop();
+            int w   = st.empty() ? i : i - st.top() - 1;
+            maxArea = max(maxArea, heights[idx] * w);
+        }
+    }
+
+    while (!st.empty()) {
+        int idx = st.top(); st.pop();
+        int w   = st.empty() ? i : i - st.top() - 1;
+        maxArea = max(maxArea, heights[idx] * w);
+    }
+
+    return maxArea;
+}
+```
+
+### Monotonic Stack for Water Trapping — Trapping Rain Water
+
+For each bar that is taller than the stack's top, pop the "mid" bar and compute the water it can hold between the current bar (right bound) and the new stack top (left bound).
+
+```cpp
+// T.C : O(n)   S.C : O(n)
+// Company Tags: Accolite, Adobe, Amazon, Microsoft, MakeMyTrip
+int trap(vector<int>& height) {
+    int n = height.size();
+    stack<int> st;
+    int water = 0;
+
+    for (int i = 0; i < n; i++) {
+        while (!st.empty() && height[i] > height[st.top()]) {
+            int mid = st.top(); st.pop();
+            if (st.empty()) break;  // no left bound
+
+            int left  = st.top();
+            int h     = min(height[i], height[left]) - height[mid];
+            int w     = i - left - 1;
+            water    += h * w;
+        }
+        st.push(i);
+    }
+
+    return water;
+}
+```
+
+## Tips for Interviews
+
+<Tip>
+The monotonic stack pattern always follows the same skeleton: iterate over the array, and while the stack is non-empty and the invariant is violated, pop and process. Internalize this loop structure and you can apply it to dozens of problems.
+</Tip>
+
+<Tip>
+For "next greater element" problems, scan right-to-left and maintain a decreasing stack. For "next smaller element" problems, maintain an increasing stack. The direction and ordering are the only things that change.
+</Tip>
+
+<Tip>
+Histogram area problems (Largest Rectangle, Maximal Rectangle, Trapping Rain Water) all reduce to finding left/right boundaries for each bar. Once you can compute NSL and NSR arrays, the area formula is straightforward.
+</Tip>
+
+<Tip>
+When implementing a calculator (Basic Calculator I / II), handle operator precedence by processing `*` and `/` immediately but deferring `+` and `-` to a final sum over the stack. This avoids complex precedence logic.
+</Tip>
+
+<Tip>
+`Implement Queue using Stacks` is a classic design question. Use two stacks: push to `s1` always, and lazy-transfer to `s2` only when `s2` is empty and a pop/peek is needed. The amortized cost per operation is O(1).
+</Tip>

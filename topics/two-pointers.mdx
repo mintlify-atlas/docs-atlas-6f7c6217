@@ -1,0 +1,224 @@
+---
+title: "Two Pointers"
+description: "Reduce O(n²) pair-finding and partitioning problems to O(n) using opposite-end, fast/slow, and same-direction pointer strategies."
+---
+
+Two pointers is a technique where you maintain two indices into a data structure and move them under some condition. It eliminates the need for a nested loop by ensuring both pointers traverse the array at most once each — giving O(n) time from an O(n²) brute force.
+
+The repository contains **29+ two-pointer solutions** in the Arrays section alone, with additional problems in the linked list and string categories.
+
+<Note>
+  Two pointers and sliding window are closely related. Sliding window is a subset of two pointers where both pointers move in the same direction and the region between them forms a contiguous window. Two pointers in the broader sense also includes opposite-end traversal on sorted arrays.
+</Note>
+
+## Three Pointer Patterns
+
+<Tabs>
+  <Tab title="Opposite ends — sorted array">
+    Start `left` at index 0 and `right` at index n−1. Move them toward each other based on whether the current pair sum (or product) is too large or too small.
+
+    **When to use:** target sum/difference problems on sorted arrays, container-with-most-water style problems.
+
+    ```cpp
+    // Template: opposite-end two pointers
+    sort(nums.begin(), nums.end());
+    int left = 0, right = nums.size() - 1;
+
+    while (left < right) {
+        int sum = nums[left] + nums[right];
+        if (sum == target) {
+            // found a valid pair
+            left++; right--;
+        } else if (sum < target) {
+            left++;   // need a larger value
+        } else {
+            right--;  // need a smaller value
+        }
+    }
+    ```
+
+    **Problems:** Two Sum II, 3Sum, 4Sum, 3Sum Closest, Container With Most Water, Boats to Save People, Valid Triangle Number, Number of Subsequences That Satisfy the Given Sum Condition
+  </Tab>
+  <Tab title="Fast / slow — cycle detection and partitioning">
+    `slow` advances one step; `fast` advances two (or jumps ahead). When `fast` reaches the end, `slow` is at the midpoint or the cycle entry.
+
+    **When to use:** removing duplicates in-place, partitioning, finding midpoints.
+
+    ```cpp
+    // Template: slow/fast to remove duplicates in-place
+    int slow = 1;
+    for (int fast = 1; fast < nums.size(); fast++) {
+        if (nums[fast] != nums[fast - 1]) {
+            nums[slow] = nums[fast];
+            slow++;
+        }
+    }
+    return slow; // new length
+    ```
+
+    **Problems:** Remove Duplicates from Sorted Array, Remove Duplicates from Sorted Array II, Move Zeroes, Remove Element
+  </Tab>
+  <Tab title="Same direction — expand/shrink window">
+    Both pointers move left to right, but at different speeds depending on a condition. This is the sliding window pattern — see the Sliding Window page for a dedicated treatment.
+
+    **When to use:** longest/shortest subarray with a property, counting valid subarrays.
+
+    ```cpp
+    // Template: same-direction two pointers (shrinkable window)
+    int left = 0;
+    for (int right = 0; right < n; right++) {
+        // include nums[right] in current window state
+        while (windowIsInvalid()) {
+            // exclude nums[left] from window state
+            left++;
+        }
+        // window [left..right] is valid
+        result = max(result, right - left + 1);
+    }
+    ```
+
+    **Problems:** Max Consecutive Ones III, Longest Balanced Subarray, Minimum Removals to Balance Array
+  </Tab>
+</Tabs>
+
+## Key Problems
+
+<CardGroup cols={2}>
+  <Card title="Two Sum II" icon="plus-minus" href="topics/two-pointers">
+    Foundational opposite-end pattern on a sorted array.
+  </Card>
+  <Card title="3Sum" icon="3" href="topics/two-pointers">
+    Fix one element, then use opposite-end pointers for the pair. Sort + skip duplicates.
+  </Card>
+  <Card title="Container With Most Water" icon="droplet" href="topics/two-pointers">
+    Move the shorter wall inward — the greedy choice that maximizes area.
+  </Card>
+  <Card title="Remove Duplicates from Sorted Array" icon="filter" href="topics/two-pointers">
+    Classic slow/fast pointer to compact an array in-place.
+  </Card>
+  <Card title="3Sum Closest" icon="bullseye" href="topics/two-pointers">
+    Opposite-end with running minimum of absolute difference.
+  </Card>
+  <Card title="Valid Triangle Number" icon="triangle-exclamation" href="topics/two-pointers">
+    Sort, fix the largest side, then use opposite pointers on the remaining two.
+  </Card>
+  <Card title="Partition Labels" icon="scissors" href="topics/two-pointers">
+    Last occurrence map + greedy expansion — single pass O(n).
+  </Card>
+  <Card title="Shortest Subarray to be Removed to Make Array Sorted" icon="sort" href="topics/two-pointers">
+    Two-pointer merge of valid prefix and valid suffix.
+  </Card>
+</CardGroup>
+
+## Full Problem List (Two Pointer / Arrays)
+
+<AccordionGroup>
+  <Accordion title="Sorted-array pair problems">
+    - Two Sum II — Input Array Is Sorted
+    - 3Sum
+    - 3Sum Closest
+    - 3Sum With Multiplicity
+    - 4Sum
+    - Valid Triangle Number
+    - Number of Subsequences That Satisfy the Given Sum Condition
+    - Minimize Maximum Pair Sum in Array
+    - Successful Pairs of Spells and Potions
+  </Accordion>
+
+  <Accordion title="In-place array modification">
+    - Remove Duplicates from Sorted Array
+    - Remove Duplicates from Sorted Array II
+    - Reverse Vowels of a String
+    - Minimum Length of String After Deleting Similar Ends
+    - Push Dominoes
+  </Accordion>
+
+  <Accordion title="Subarray / window problems">
+    - Max Consecutive Ones III
+    - Longest Balanced Subarray I
+    - Longest Balanced Substring I
+    - Minimum Removals to Balance Array
+    - Shortest Subarray to be Removed to Make Array Sorted
+    - Longest Substring Without Repeating Characters
+  </Accordion>
+
+  <Accordion title="Container / geometry">
+    - Container With Most Water
+    - Maximum Width Ramp
+    - Longest Mountain in Array
+  </Accordion>
+
+  <Accordion title="Partitioning and labeling">
+    - Partition Labels
+    - Count the Number of Good Partitions
+    - Count Alternating Subarrays
+    - Minimum Difference Between Highest and Lowest of K Scores
+  </Accordion>
+</AccordionGroup>
+
+## Code: 3Sum
+
+The 3Sum problem illustrates the core opposite-end pattern on a sorted array, extended with duplicate-skipping.
+
+```cpp
+// T.C: O(n²)  S.C: O(1) excluding output
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
+        vector<vector<int>> result;
+        int n = nums.size();
+
+        for (int i = 0; i < n - 2; i++) {
+            // Skip duplicate values at the fixed position
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+
+            int left = i + 1, right = n - 1;
+
+            while (left < right) {
+                int sum = nums[i] + nums[left] + nums[right];
+                if (sum == 0) {
+                    result.push_back({nums[i], nums[left], nums[right]});
+                    // Skip duplicates on both sides
+                    while (left < right && nums[left] == nums[left + 1]) left++;
+                    while (left < right && nums[right] == nums[right - 1]) right--;
+                    left++; right--;
+                } else if (sum < 0) {
+                    left++;
+                } else {
+                    right--;
+                }
+            }
+        }
+        return result;
+    }
+};
+```
+
+## Study Tips
+
+<Tip>
+  **Sort first.** Almost all opposite-end two-pointer problems require the array to be sorted. Sorting costs O(n log n) but the subsequent two-pointer pass is O(n), keeping the overall complexity at O(n log n).
+</Tip>
+
+<Tip>
+  **Skip duplicates explicitly.** After recording a valid pair or triplet, advance both pointers past any duplicate values to avoid counting the same combination twice.
+</Tip>
+
+<Tip>
+  The difference between two-pointers and sliding window is subtle: sliding window always maintains a contiguous valid window and shrinks when the window becomes invalid. Opposite-end two pointers do not maintain a window — they converge toward a target from both ends.
+</Tip>
+
+## Related Topics
+
+<CardGroup cols={3}>
+  <Card title="Sliding Window" icon="window-maximize" href="topics/sliding-window">
+    Same-direction two pointers form the sliding window pattern
+  </Card>
+  <Card title="Arrays" icon="table-list" href="topics/arrays">
+    Two pointers is one of the core array problem-solving techniques
+  </Card>
+  <Card title="Greedy" icon="bolt" href="topics/greedy">
+    Many two-pointer problems involve a greedy choice of which pointer to move
+  </Card>
+</CardGroup>

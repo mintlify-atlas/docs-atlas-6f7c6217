@@ -1,0 +1,205 @@
+---
+title: 'Segment Tree'
+description: 'Range sum, range minimum/maximum queries, and lazy propagation for range updates — O(log n) query and update with 10 solutions covering every major Segment Tree pattern.'
+keywords: ['segment tree', 'range sum query', 'range minimum query', 'lazy propagation', 'range update', 'mutable', 'interval tree']
+---
+
+A **Segment Tree** is a binary tree built over an array that enables range queries (sum, min, max) and point updates in **O(log n)** time. It is the go-to data structure when a problem involves many queries and updates over subarray ranges.
+
+The repository contains **10 Segment Tree solutions** covering range queries, range updates, and lazy propagation.
+
+## Time complexity
+
+| Operation | Time | Notes |
+|-----------|------|-------|
+| Build | O(n) | Construct the tree from an array of size n |
+| Point update | O(log n) | Update a single index, propagate up |
+| Range query | O(log n) | Query sum/min/max over an arbitrary [l, r] range |
+| Range update (lazy) | O(log n) | Update a range and defer propagation |
+
+Space complexity is **O(n)** — the segment tree array is sized `4 * n` to accommodate all nodes safely.
+
+## Sub-topics
+
+<CardGroup cols={2}>
+  <Card title="Range Sum Query" icon="sigma" href="/topics/segment-tree">
+    Build, point-update, and sum-query over arbitrary [l, r] ranges in O(log n).
+  </Card>
+  <Card title="Range Minimum / Maximum Query" icon="arrow-down-up" href="/topics/segment-tree">
+    Min or max over a range, and finding the index of the minimum element.
+  </Card>
+  <Card title="Lazy Propagation" icon="clock" href="/topics/segment-tree">
+    Defer range updates to children only when needed, keeping range updates at O(log n).
+  </Card>
+  <Card title="Advanced applications" icon="chart-bar" href="/topics/segment-tree">
+    Count good triplets in an array, find building where Alice and Bob meet, sum of queries.
+  </Card>
+</CardGroup>
+
+## Key problems
+
+| Problem | Variant | Difficulty |
+|---------|---------|-----------|
+| Range Sum Query - Mutable | Point update + range sum | Medium |
+| Range Minimum Query | Point update + range min | Medium |
+| Range Maximum Index Query | Point update + range max index | Medium |
+| Lazy Propagation Range Update | Range add + range sum | Medium |
+| Count Good Triplets in an Array | Merge sort / Segment Tree | Hard |
+| Find Building Where Alice and Bob Can Meet | Offline queries + Segment Tree | Hard |
+
+## Code example — Range Sum Query (Mutable)
+
+The segment tree stores partial sums. Each internal node stores the sum of its range. Updates and queries traverse at most O(log n) nodes.
+
+**Company: META**
+
+```cpp
+// Approach: Segment Tree
+// T.C: build O(n), update O(log n), sumRange O(log n)
+// S.C: O(n)
+class NumArray {
+public:
+    int n;
+    vector<int> segmentTree;
+
+    // Build: fill leaves, then aggregate upward
+    void buildSegmentTree(int i, int l, int r, vector<int>& nums) {
+        if (l == r) {
+            segmentTree[i] = nums[l];
+            return;
+        }
+        int mid = l + (r - l) / 2;
+        buildSegmentTree(2*i+1, l,   mid, nums);
+        buildSegmentTree(2*i+2, mid+1, r, nums);
+        segmentTree[i] = segmentTree[2*i+1] + segmentTree[2*i+2];
+    }
+
+    // Update: walk down to the leaf, then recompute sums on the way up
+    void updateSegTree(int index, int val, int i, int l, int r) {
+        if (l == r) {
+            segmentTree[i] = val;
+            return;
+        }
+        int mid = l + (r - l) / 2;
+        if (index <= mid)
+            updateSegTree(index, val, 2*i+1, l,   mid);
+        else
+            updateSegTree(index, val, 2*i+2, mid+1, r);
+        segmentTree[i] = segmentTree[2*i+1] + segmentTree[2*i+2];
+    }
+
+    // Query: return 0 for out-of-range, full node sum if fully inside range
+    int querySegmentTree(int start, int end, int i, int l, int r) {
+        if (l > end || r < start) return 0;           // no overlap
+        if (l >= start && r <= end) return segmentTree[i]; // full overlap
+        int mid = l + (r - l) / 2;
+        return querySegmentTree(start, end, 2*i+1, l,   mid)
+             + querySegmentTree(start, end, 2*i+2, mid+1, r);
+    }
+
+    NumArray(vector<int>& nums) {
+        n = nums.size();
+        segmentTree.resize(4 * n);
+        buildSegmentTree(0, 0, n-1, nums);
+    }
+
+    void update(int index, int val) {
+        updateSegTree(index, val, 0, 0, n-1);
+    }
+
+    int sumRange(int left, int right) {
+        return querySegmentTree(left, right, 0, 0, n-1);
+    }
+};
+```
+
+<Tip>
+The `4 * n` size for the segment tree array is a safe upper bound that prevents index-out-of-bounds for any input size. For a perfect binary tree of size n, you need at most `2 * 2^ceil(log2(n))` nodes, which is always ≤ `4 * n`.
+</Tip>
+
+## Tree structure and indexing
+
+The segment tree is stored as an array using 0-based indexing:
+
+```
+Node i:
+  Left child  = 2*i + 1
+  Right child = 2*i + 2
+  Parent      = (i - 1) / 2
+```
+
+For an array `[1, 3, 5, 7, 9, 11]`, the segment tree (sum variant) looks like:
+
+```
+                36          (index 0, range [0,5])
+            /        \
+          9             27  (index 1 [0,2], index 2 [3,5])
+        /   \          /   \
+       4     5       16    11  (ranges [0,1],[2,2],[3,4],[5,5])
+      / \              / \
+     1   3            7   9
+```
+
+## Lazy propagation
+
+Without lazy propagation, a range update (e.g., add 5 to all elements in [l, r]) requires O(n) time in the worst case. Lazy propagation defers updates to children until they are actually needed.
+
+```cpp
+// Segment Tree with Lazy Propagation
+// T.C: range update O(log n), range query O(log n)
+void updateRange(int node, int l, int r, int ql, int qr, int val) {
+    if (lazy[node] != 0) {             // push down pending update
+        tree[node] += (r - l + 1) * lazy[node];
+        if (l != r) {
+            lazy[2*node+1] += lazy[node];
+            lazy[2*node+2] += lazy[node];
+        }
+        lazy[node] = 0;
+    }
+    if (r < ql || l > qr) return;     // no overlap
+    if (ql <= l && r <= qr) {          // full overlap
+        tree[node] += (r - l + 1) * val;
+        if (l != r) {
+            lazy[2*node+1] += val;
+            lazy[2*node+2] += val;
+        }
+        return;
+    }
+    int mid = l + (r - l) / 2;
+    updateRange(2*node+1, l,   mid, ql, qr, val);
+    updateRange(2*node+2, mid+1, r, ql, qr, val);
+    tree[node] = tree[2*node+1] + tree[2*node+2];
+}
+```
+
+<Note>
+The `lazy` array stores pending increments that have not yet been propagated to children. Always push down lazy values before reading or updating children.
+</Note>
+
+## Build steps
+
+<Steps>
+  <Step title="Allocate the tree array">
+    Create a `vector<int> segmentTree(4 * n, 0)` to store all nodes. Size `4 * n` is always sufficient.
+  </Step>
+  <Step title="Build recursively from leaves">
+    Call `build(0, 0, n-1)`. At each leaf (l == r), set `tree[i] = nums[l]`. At each internal node, set `tree[i] = tree[left_child] + tree[right_child]`.
+  </Step>
+  <Step title="Implement query with three cases">
+    No overlap → return identity (0 for sum, INT_MAX for min). Full overlap → return `tree[i]`. Partial overlap → recurse on both children and combine results.
+  </Step>
+  <Step title="Implement update — walk down, recompute up">
+    Navigate to the leaf matching the index, update it, then recalculate the parent sums on the way back up the recursion.
+  </Step>
+  <Step title="Add lazy array for range updates">
+    If the problem requires updating a range (not just a point), add a `lazy[]` array of the same size. Push down lazy values before any recursive call on children.
+  </Step>
+</Steps>
+
+<Warning>
+A Segment Tree is overkill for problems where the array is read-only (no updates). For static range sum queries, a simple prefix sum array answers queries in O(1) with O(n) preprocessing.
+</Warning>
+
+<Info>
+Related topics: [Arrays](/topics/arrays) for prefix sum and sliding window alternatives, [Dynamic Programming](/topics/dynamic-programming) for interval DP problems, [Mathematical](/topics/mathematical) for Fenwick Tree (Binary Indexed Tree) as a lighter alternative for sum queries.
+</Info>

@@ -1,0 +1,85 @@
+---
+title: "Company tags"
+description: "Every solution file lists the companies that have asked that problem in interviews. Learn how to use company tags to focus your preparation."
+---
+
+## What are company tags?
+
+At the top of every solution file, a comment block lists all the companies known to have asked that problem in real coding interviews. This lets you go straight to the problems most relevant for your specific target company.
+
+Here is the exact format as it appears in the source files:
+
+```cpp
+/*
+    MY YOUTUBE VIDEO ON THIS Qn : https://www.youtube.com/watch?v=TCaBnVIllrQ
+    Company Tags                : Zoho, Flipkart, Morgan Stanley, Accolite, Amazon,
+                                  Microsoft, FactSet, Hike, Adobe, Google, Wipro,
+                                  SAP Labs, CarWale
+    Leetcode Link               : https://leetcode.com/problems/two-sum/
+*/
+```
+
+Another example from a graph problem:
+
+```cpp
+/*
+    Company Tags : Paytm, Amazon, Microsoft, Samsung, Snapdeal, Citrix, D-E-Shaw,
+                   Ola Cabs, Visa, Linkedin, Opera, Streamoid Technologies, Informatica
+*/
+```
+
+## How to use company tags for targeted prep
+
+If you know which company you're interviewing at, you can search across the entire repository for all problems tagged with that company.
+
+<Tip>
+  Use `git grep` to instantly find every solution file tagged with a specific company:
+
+  ```bash
+  git grep "Company Tags.*Amazon" --include="*.cpp"
+  ```
+
+  Replace `Amazon` with any company name. This works for any company in the list below. To match partial names, use a substring:
+
+  ```bash
+  git grep "Company Tags.*Microsoft" --include="*.cpp"
+  ```
+</Tip>
+
+Once you have the list of matching files, open each one, attempt the problem on LeetCode, and use the linked video if you need a walkthrough.
+
+<Note>
+  Frequency tags are being added to solutions from a certain point onwards. When a frequency value is present in the file header, it indicates how often that problem has appeared in real interviews — useful for deciding what to prioritize within a company's problem set.
+</Note>
+
+## Full list of companies
+
+<AccordionGroup>
+  <Accordion title="Full list of companies represented">
+    The following companies appear as tags across the solutions in this repository:
+
+    Accolite, Adobe, Amazon, CarWale, Citrix, D-E-Shaw, Facebook, FactSet,
+    Flipkart, Google, Hike, Informatica, Linkedin, Microsoft, Morgan Stanley,
+    Ola Cabs, Opera, OYO Rooms, Paytm, Samsung, SAP Labs, Siemens, Snapdeal,
+    Streamoid Technologies, Tokopedia, Tower Research, Visa, Wipro, Zoho
+  </Accordion>
+</AccordionGroup>
+
+## Explore by topic
+
+Use company tags together with topic pages to narrow your prep to a specific domain for a specific company.
+
+<CardGroup cols={2}>
+  <Card title="Dynamic Programming" icon="table" href="/topics/dynamic-programming">
+    Frequently tested at Google, Amazon, and Microsoft. Includes 1-D DP, DP on grids, and LIS variants.
+  </Card>
+  <Card title="Graph" icon="circle-nodes" href="/topics/graph">
+    Common at Amazon, Microsoft, and Paytm. Covers BFS, DFS, shortest paths, and Union-Find.
+  </Card>
+  <Card title="Arrays" icon="list" href="/topics/arrays">
+    Asked by almost every company. Two pointers, sliding window, and prefix sum patterns.
+  </Card>
+  <Card title="Tree" icon="tree" href="/topics/tree">
+    Traversals, LCA, and path problems. Heavily tested at Adobe, Amazon, and Google.
+  </Card>
+</CardGroup>

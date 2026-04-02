@@ -1,0 +1,139 @@
+---
+title: "Strings"
+description: "String manipulation patterns including KMP, two pointers, sliding window, palindrome detection, and pattern matching — with real examples from the repo."
+---
+
+String problems are ubiquitous in interviews, ranging from straightforward manipulation tasks to advanced algorithmic challenges like KMP pattern matching and palindrome construction. The repo contains over 80 string problems covering every common interview pattern.
+
+## Sub-topics
+
+<CardGroup cols={2}>
+  <Card title="String Algorithms (KMP)" icon="code">
+    The Knuth-Morris-Pratt algorithm uses a failure function (LPS array) to find pattern occurrences in O(n+m) time. Essential for shortest palindrome, repeated substring pattern, and minimum time to revert word problems.
+  </Card>
+  <Card title="Two Pointers on Strings" icon="arrows-left-right">
+    Use left/right or slow/fast pointer pairs to solve in-place reversal, backspace comparison, and move-pieces problems without extra space.
+  </Card>
+  <Card title="Sliding Window on Strings" icon="window">
+    Maintain a character frequency map inside a shrinking/expanding window. Covers Minimum Window Substring, Longest Substring Without Repeating Characters, and Count Beautiful Substrings.
+  </Card>
+  <Card title="Palindrome Problems" icon="reflect-horizontal">
+    Detect, construct, and extend palindromic substrings. Covers Shortest Palindrome (via KMP LPS), Unique Length-3 Palindromic Subsequences, and Construct K Palindrome Strings.
+  </Card>
+  <Card title="Pattern Matching" icon="magnifying-glass">
+    Exact and fuzzy matching: Find the Index of the First Occurrence (KMP), Number of Subarrays That Match a Pattern, and Stamping the Sequence.
+  </Card>
+  <Card title="Parsing and Simulation" icon="gears">
+    Process character streams step by step: Basic Calculator, Decode String, Reverse Substrings Between Parentheses, and Text Justification.
+  </Card>
+</CardGroup>
+
+## Key Problems
+
+| Problem | Pattern | Companies |
+|---|---|---|
+| Reverse Words in a String | Two pointers / stringstream | Amazon, Microsoft, Adobe, Goldman Sachs, Samsung |
+| Shortest Palindrome | KMP LPS array | Google |
+| Find the Index of the First Occurrence | KMP | Multiple companies |
+| Minimum Window Substring | Sliding window | Multiple top companies |
+| String Compression | Two pointers | Multiple companies |
+| Remove Duplicate Letters | Monotonic stack on string | Google |
+| Text Justification | Simulation | Google |
+| Integer to Roman | Simulation / greedy | Amazon, Goldman Sachs |
+| Multiply Strings | Grade-school multiplication simulation | Amazon, Google |
+| Minimum Remove to Make Valid Parentheses | Stack | Amazon, Facebook |
+| Repeated Substring Pattern | KMP | Amazon |
+| Count and Say | Simulation | Amazon, Google, Facebook |
+
+## Technique Patterns
+
+### Reverse Words — Two Pointer Approach
+
+Reverse the entire string, then reverse each word individually. The `stringstream` approach is cleaner; the two-pointer approach works in O(1) space.
+
+```cpp
+// T.C : O(n)   S.C : O(1)
+// Company Tags: Amazon, Microsoft, Adobe, Goldman Sachs, Samsung
+string reverseWords(string s) {
+    // Step 1: reverse the whole string
+    reverse(s.begin(), s.end());
+
+    int n = s.length();
+    int l = 0, r = 0, i = 0;
+
+    while (i < n) {
+        // collect non-space characters
+        while (i < n && s[i] != ' ')
+            s[r++] = s[i++];
+
+        if (l < r) {
+            // reverse the current word
+            reverse(s.begin() + l, s.begin() + r);
+            s[r] = ' ';
+            r++;
+            l = r;
+        }
+        i++;
+    }
+
+    return s.substr(0, r - 1);
+}
+```
+
+### KMP LPS Array — Shortest Palindrome
+
+Compute the Longest Proper Prefix which is also Suffix (LPS) array over `s + "#" + reverse(s)` to find the longest palindromic prefix in O(n).
+
+```cpp
+// T.C : O(n)   S.C : O(n)
+// Company Tags: Google
+void computeLPS(string pattern, vector<int>& lps) {
+    int len = 0, i = 1;
+    lps[0] = 0;
+
+    while (i < (int)pattern.size()) {
+        if (pattern[i] == pattern[len]) {
+            lps[i++] = ++len;
+        } else {
+            if (len != 0)
+                len = lps[len - 1];
+            else
+                lps[i++] = 0;
+        }
+    }
+}
+
+string shortestPalindrome(string s) {
+    string rev  = s;
+    reverse(begin(rev), end(rev));
+    string temp = s + "-" + rev;
+
+    vector<int> lps(temp.size(), 0);
+    computeLPS(temp, lps);
+
+    int longestPrefix = lps[temp.size() - 1];
+    return rev.substr(0, s.size() - longestPrefix) + s;
+}
+```
+
+## Tips for Interviews
+
+<Tip>
+When a problem involves finding a substring that satisfies a frequency constraint, think sliding window with a character frequency map first. Expand the right pointer, then shrink the left pointer to restore validity.
+</Tip>
+
+<Tip>
+KMP's LPS (failure function) array has uses beyond pattern matching: it can detect repeated substrings, find the shortest palindrome prefix, and solve "minimum time to revert word" problems. Learn to build the LPS array on its own, not just inside the full KMP search.
+</Tip>
+
+<Tip>
+In-place string reversal problems (Reverse Words, Reverse Words II) usually follow a two-step recipe: reverse the whole string, then reverse each segment. Recognize this template and code it directly.
+</Tip>
+
+<Tip>
+For parentheses validity problems (Minimum Remove to Make Valid Parentheses, Minimum Add to Make Parentheses Valid), a stack that tracks unmatched indices is usually cleaner and more adaptable than counter-based approaches.
+</Tip>
+
+<Tip>
+`std::stringstream` is a powerful C++ tool for tokenizing strings on whitespace. It is worth knowing for interview coding, but be ready to implement the two-pointer version as well since interviewers sometimes restrict library use.
+</Tip>

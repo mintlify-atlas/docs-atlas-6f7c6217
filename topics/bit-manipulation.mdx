@@ -1,0 +1,292 @@
+---
+title: "Bit Manipulation"
+description: "O(1) and O(log n) solutions to number problems using bitwise operations — 38+ problems covering XOR tricks, masking, and Trie-based maximum XOR."
+---
+
+Bit manipulation treats integers as arrays of bits and exploits hardware-level bitwise operations. When applicable, bit tricks often replace loops entirely — reducing O(n) or O(n log n) solutions to O(1) or O(log n).
+
+The repository contains **38+ bit manipulation solutions** covering XOR uniqueness tricks, bitmask subset enumeration, power-of-two checks, and Trie-based maximum XOR.
+
+<Note>
+  Bit manipulation is frequently tested at Microsoft, Google, and Amazon for roles that require systems-level thinking. Even if you never use it in day-to-day code, knowing the patterns makes you significantly faster on a specific class of interview problems.
+</Note>
+
+## Core Operations Reference
+
+<AccordionGroup>
+  <Accordion title="Check, set, clear, and toggle a bit">
+    All operations index bits from 0 (LSB) on the right.
+
+    ```cpp
+    int n = 0b1010;      // example: decimal 10
+
+    // Check if bit i is set
+    bool isSet = (n >> i) & 1;
+
+    // Set bit i
+    n = n | (1 << i);
+
+    // Clear bit i
+    n = n & ~(1 << i);
+
+    // Toggle bit i
+    n = n ^ (1 << i);
+
+    // Isolate the lowest set bit
+    int lsb = n & (-n);        // two's complement trick
+
+    // Remove the lowest set bit
+    n = n & (n - 1);           // Brian Kernighan's trick — used to count set bits
+    ```
+  </Accordion>
+
+  <Accordion title="Power-of-two and divisibility checks">
+    ```cpp
+    // Is n a power of 2?
+    bool isPow2 = (n > 0) && ((n & (n - 1)) == 0);
+
+    // Is n divisible by 2?
+    bool isEven = (n & 1) == 0;
+
+    // Multiply / divide by 2
+    int doubled  = n << 1;
+    int halved   = n >> 1;
+
+    // Compute n % (power of 2), e.g. n % 8
+    int remainder = n & 7;   // n & (k-1) when k is a power of 2
+    ```
+  </Accordion>
+
+  <Accordion title="XOR properties">
+    XOR is the workhorse of bit manipulation interview problems.
+
+    ```cpp
+    // XOR of a number with itself is 0
+    int x = 5;
+    x ^ x == 0;       // true
+
+    // XOR with 0 is identity
+    x ^ 0 == x;       // true
+
+    // XOR is commutative and associative
+    // So XOR of all elements cancels duplicates, leaving the unique element
+    int arr[] = {1, 2, 1, 3, 2};
+    int unique = 0;
+    for (int x : arr) unique ^= x;   // unique == 3
+    ```
+  </Accordion>
+
+  <Accordion title="Count set bits (Hamming weight)">
+    ```cpp
+    // Brian Kernighan: each iteration clears the lowest set bit
+    int countBits(int n) {
+        int count = 0;
+        while (n) {
+            n &= (n - 1);
+            count++;
+        }
+        return count;
+    }
+
+    // Built-in (GCC)
+    int count = __builtin_popcount(n);
+    ```
+  </Accordion>
+
+  <Accordion title="Bitmask subset enumeration">
+    Enumerate all subsets of an n-element set in O(2ⁿ) using bitmasks.
+
+    ```cpp
+    int n = 4;
+    for (int mask = 0; mask < (1 << n); mask++) {
+        // mask represents one subset
+        for (int i = 0; i < n; i++) {
+            if ((mask >> i) & 1) {
+                // element i is in this subset
+            }
+        }
+    }
+
+    // Enumerate all subsets of a given mask
+    for (int sub = mask; sub > 0; sub = (sub - 1) & mask) {
+        // process sub
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Common Tricks Table
+
+<AccordionGroup>
+  <Accordion title="XOR tricks — find unique elements">
+    | Pattern | Trick |
+    |---------|-------|
+    | One number appears once; rest appear twice | XOR all elements → result is the unique number |
+    | One number appears once; rest appear three times | Use bit-counting modulo 3 (Single Number II) |
+    | Two numbers appear once; rest appear twice | XOR all, split into two groups by a differing bit (Single Number III) |
+    | Detect if two strings are anagrams via XOR | XOR char counts — 0 means anagram |
+  </Accordion>
+
+  <Accordion title="Brian Kernighan — counting and isolating bits">
+    | Operation | Code |
+    |-----------|------|
+    | Count set bits | `while(n) { n &= n-1; count++; }` |
+    | Check if power of 2 | `n > 0 && (n & (n-1)) == 0` |
+    | Remove lowest set bit | `n & (n - 1)` |
+    | Isolate lowest set bit | `n & (-n)` |
+  </Accordion>
+
+  <Accordion title="Bit masking — subset and flag patterns">
+    | Pattern | Usage |
+    |---------|-------|
+    | Check if element i is in subset | `(mask >> i) & 1` |
+    | Add element i to subset | `mask \| (1 << i)` |
+    | Remove element i from subset | `mask & ~(1 << i)` |
+    | Enumerate all 2ⁿ subsets | `for mask in [0, 1<<n)` |
+    | Enumerate sub-subsets | `for sub = mask; sub > 0; sub = (sub-1) & mask` |
+  </Accordion>
+
+  <Accordion title="Shift tricks">
+    | Operation | Code |
+    |-----------|------|
+    | Get bit i | `(n >> i) & 1` |
+    | Set bit i | `n \| (1 << i)` |
+    | Multiply by 2ⁱ | `n << i` |
+    | Divide by 2ⁱ (unsigned) | `n >> i` |
+    | Swap two integers (no temp) | `a ^= b; b ^= a; a ^= b;` |
+    | Absolute value (branchless) | `(n ^ (n >> 31)) - (n >> 31)` |
+  </Accordion>
+</AccordionGroup>
+
+## Key Problems
+
+<CardGroup cols={2}>
+  <Card title="Single Number" icon="1" href="topics/bit-manipulation">
+    XOR all elements — pairs cancel to 0, leaving the unique number.
+  </Card>
+  <Card title="Single Number II" icon="2" href="topics/bit-manipulation">
+    Bit-counting modulo 3 — each bit of the result is (sum of that bit position) % 3.
+  </Card>
+  <Card title="Maximum XOR of Two Numbers in an Array" icon="maximize" href="topics/bit-manipulation">
+    Bit Trie: greedily choose the opposite bit at each level. Tags: Microsoft.
+  </Card>
+  <Card title="Counting Bits" icon="calculator" href="topics/bit-manipulation">
+    DP: `dp[i] = dp[i >> 1] + (i & 1)` — O(n) with bit trick.
+  </Card>
+  <Card title="Number of 1 Bits" icon="hashtag" href="topics/bit-manipulation">
+    Brian Kernighan's algorithm: `n &= n-1` until n is 0.
+  </Card>
+  <Card title="Bitwise AND of Numbers Range" icon="ampersand" href="topics/bit-manipulation">
+    Find the common prefix of m and n in binary by right-shifting until equal.
+  </Card>
+  <Card title="XOR Queries of a Subarray" icon="square-xmark" href="topics/bit-manipulation">
+    Prefix XOR array: `query(l, r) = prefix[r] ^ prefix[l-1]`.
+  </Card>
+  <Card title="Subsets" icon="list" href="topics/bit-manipulation">
+    Enumerate all 2ⁿ subsets using bitmasks from 0 to 2ⁿ−1.
+  </Card>
+</CardGroup>
+
+## Code: Maximum XOR of Two Numbers in an Array
+
+**Company Tags:** Microsoft
+
+**T.C:** O(32 × n) — insert all numbers into a Trie, then query each one.
+**S.C:** O(32 × n) for the Trie nodes.
+
+```cpp
+class Solution {
+public:
+    struct TrieNode {
+        TrieNode* left;   // represents bit 0
+        TrieNode* right;  // represents bit 1
+    };
+
+    void insert(TrieNode* head, int& num) {
+        TrieNode* pCrawl = head;
+        // Insert MSB first (bit 31 down to bit 0)
+        for (int i = 31; i >= 0; i--) {
+            int ith_bit = (num >> i) & 1;
+            if (ith_bit == 0) {
+                if (!pCrawl->left)
+                    pCrawl->left = new TrieNode();
+                pCrawl = pCrawl->left;
+            } else {
+                if (!pCrawl->right)
+                    pCrawl->right = new TrieNode();
+                pCrawl = pCrawl->right;
+            }
+        }
+    }
+
+    int maxXor(TrieNode* head, int& num) {
+        int result = 0;
+        TrieNode* pCrawl = head;
+        // Walk MSB to LSB, greedily choosing the opposite bit
+        for (int i = 31; i >= 0; i--) {
+            int ith_bit = (num >> i) & 1;
+            if (ith_bit == 1) {
+                // Need a 0 in the other number to get XOR bit = 1
+                if (pCrawl->left) {
+                    result += (1 << i);
+                    pCrawl = pCrawl->left;
+                } else {
+                    pCrawl = pCrawl->right;
+                }
+            } else {
+                // Need a 1 in the other number to get XOR bit = 1
+                if (pCrawl->right) {
+                    result += (1 << i);
+                    pCrawl = pCrawl->right;
+                } else {
+                    pCrawl = pCrawl->left;
+                }
+            }
+        }
+        return result;
+    }
+
+    int findMaximumXOR(vector<int>& nums) {
+        TrieNode* root = new TrieNode();
+        for (int& x : nums)
+            insert(root, x);
+
+        int result = 0;
+        for (int& x : nums)
+            result = max(result, maxXor(root, x));
+        return result;
+    }
+};
+```
+
+<Note>
+  The Trie approach works because XOR is maximized bit-by-bit from the MSB. At each Trie level, we try to go in the direction that gives us a `1` bit in the XOR result. If that path does not exist, we take the only available path (getting a `0` bit).
+</Note>
+
+## Study Tips
+
+<Tip>
+  When you see "find the element that appears an odd number of times" or "find the single unique element", immediately think XOR — it is almost always the cleanest solution.
+</Tip>
+
+<Tip>
+  For bitmask DP (state = subset of n elements), the state space is 2ⁿ. This is only feasible for n ≤ 20 in most contest/interview settings.
+</Tip>
+
+<Tip>
+  Practice reading numbers in binary. When you can mentally see `10 = 1010₂` and `12 = 1100₂`, AND/OR/XOR results become obvious without calculation.
+</Tip>
+
+## Related Topics
+
+<CardGroup cols={3}>
+  <Card title="Trie" icon="tree" href="topics/trie">
+    Maximum XOR uses a binary Trie — a Trie where each node branches on a bit
+  </Card>
+  <Card title="Dynamic Programming" icon="table" href="topics/dynamic-programming">
+    Bitmask DP uses bit manipulation to encode subset states
+  </Card>
+  <Card title="Mathematical" icon="square-root-variable" href="topics/mathematical">
+    Many number theory problems overlap with bit manipulation
+  </Card>
+</CardGroup>

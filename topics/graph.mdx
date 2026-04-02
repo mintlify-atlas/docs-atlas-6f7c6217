@@ -1,0 +1,282 @@
+---
+title: 'Graphs'
+description: 'BFS, DFS, Dijkstra, Bellman-Ford, Floyd-Warshall, topological sort, Union-Find, MST, SCC, bipartite checking, and multi-source BFS — 80+ solutions for FAANG graph interviews.'
+keywords: ['graph', 'BFS', 'DFS', 'Dijkstra', 'topological sort', 'Union-Find', 'MST', 'Kruskal', 'Prim', 'Kosaraju', 'bipartite', 'number of islands']
+---
+
+Graph problems are among the heaviest-weighted topics in FAANG interviews. The repository contains **80+ graph solutions** covering every major algorithm and pattern you are likely to face.
+
+## Sub-topics
+
+<CardGroup cols={2}>
+  <Card title="BFS & DFS" icon="arrow-right-arrow-left" href="/topics/graph">
+    Grid traversal, connected components, flood fill, path existence, and reachability.
+  </Card>
+  <Card title="Shortest Path Algorithms" icon="route" href="/topics/graph">
+    Dijkstra (priority queue and set), Bellman-Ford, Floyd-Warshall, and multi-source BFS.
+  </Card>
+  <Card title="Topological Sort" icon="list-ol" href="/topics/graph">
+    Kahn's algorithm (BFS) and DFS-based topological ordering for DAGs.
+  </Card>
+  <Card title="Union-Find (Disjoint Set)" icon="code-merge" href="/topics/graph">
+    Union by rank, path compression, cycle detection, and dynamic connectivity.
+  </Card>
+  <Card title="Minimum Spanning Tree" icon="tree" href="/topics/graph">
+    Kruskal's algorithm (sort edges + Union-Find) and Prim's algorithm (priority queue).
+  </Card>
+  <Card title="Strongly Connected Components" icon="circle-dot" href="/topics/graph">
+    Kosaraju's two-pass DFS algorithm for directed graphs.
+  </Card>
+  <Card title="Bipartite Checking" icon="columns" href="/topics/graph">
+    2-coloring via BFS or DFS to verify graph is bipartite.
+  </Card>
+  <Card title="Multi-Source BFS" icon="radio" href="/topics/graph">
+    Simultaneous BFS from multiple sources: rotting oranges, walls and gates, nearest cell patterns.
+  </Card>
+</CardGroup>
+
+## Key problems
+
+| Problem | Algorithm | Companies |
+|---------|-----------|-----------|
+| Number of Islands | DFS / BFS / Union-Find | Paytm, Amazon, Microsoft, Samsung, Snapdeal, D-E-Shaw, LinkedIn |
+| Word Ladder | BFS (shortest path in unweighted graph) | Amazon, Microsoft |
+| Course Schedule | Topological sort / cycle detection | Amazon, Google, Meta |
+| Cheapest Flights Within K Stops | Modified Bellman-Ford / BFS | Amazon, Google |
+| Minimum Spanning Tree | Kruskal's / Prim's | Flipkart, Microsoft |
+| Reconstruct Itinerary | DFS + Euler path | Google |
+| Clone Graph | BFS / DFS + HashMap | Amazon, Google, Meta |
+| Bipartite Graph | BFS 2-coloring | Google, Meta |
+
+## Code example — Number of Islands
+
+<Tabs>
+  <Tab title="DFS approach">
+    Mark each visited land cell as `'$'` to avoid revisiting. Each DFS call sinks an entire island.
+
+    **T.C: O(m×n) — S.C: O(m×n)** (recursion stack)
+
+    ```cpp
+// Approach-1: DFS
+// Company Tags: Paytm, Amazon, Microsoft, Samsung, Snapdeal, Citrix, D-E-Shaw, Ola Cabs, Visa, Linkedin, Opera, Informatica
+    class Solution {
+    public:
+        vector<pair<int,int>> dir{{1,0},{-1,0},{0,1},{0,-1}};
+
+        void dfs(vector<vector<char>>& grid, int i, int j) {
+            if (i < 0 || i >= grid.size() ||
+                j < 0 || j >= grid[0].size() || grid[i][j] != '1')
+                return;
+
+            grid[i][j] = '$';  // mark visited
+
+            for (auto& p : dir)
+                dfs(grid, i + p.first, j + p.second);
+        }
+
+        int numIslands(vector<vector<char>>& grid) {
+            if (grid.empty()) return 0;
+            int count = 0;
+            for (int i = 0; i < grid.size(); i++)
+                for (int j = 0; j < grid[0].size(); j++)
+                    if (grid[i][j] == '1') {
+                        dfs(grid, i, j);
+                        count++;
+                    }
+            return count;
+        }
+    };
+    ```
+  </Tab>
+  <Tab title="BFS approach">
+    BFS processes cells level by level. A lambda validates bounds and unvisited land before enqueuing.
+
+    **T.C: O(m×n) — S.C: O(m×n)** (queue)
+
+    ```cpp
+    // Approach-2: BFS
+    class Solution {
+    public:
+        vector<pair<int,int>> dir{{1,0},{-1,0},{0,1},{0,-1}};
+
+        void bfs(vector<vector<char>>& grid, int i, int j,
+                 queue<pair<int,int>>& que) {
+            que.push({i, j});
+            grid[i][j] = '$';
+
+            auto isSafe = [&](int& r, int& c) {
+                return r >= 0 && r < (int)grid.size() &&
+                       c >= 0 && c < (int)grid[0].size() &&
+                       grid[r][c] == '1';
+            };
+
+            while (!que.empty()) {
+                auto [ci, cj] = que.front(); que.pop();
+                for (auto& p : dir) {
+                    int ni = ci + p.first, nj = cj + p.second;
+                    if (isSafe(ni, nj)) {
+                        que.push({ni, nj});
+                        grid[ni][nj] = '$';
+                    }
+                }
+            }
+        }
+
+        int numIslands(vector<vector<char>>& grid) {
+            if (grid.empty()) return 0;
+            int count = 0;
+            queue<pair<int,int>> que;
+            for (int i = 0; i < grid.size(); i++)
+                for (int j = 0; j < grid[0].size(); j++)
+                    if (grid[i][j] == '1') {
+                        bfs(grid, i, j, que);
+                        count++;
+                    }
+            return count;
+        }
+    };
+    ```
+  </Tab>
+</Tabs>
+
+## Code example — Dijkstra's Algorithm (set-based)
+
+Dijkstra finds the shortest path from a single source to all other vertices in a weighted graph with non-negative edges.
+
+**T.C: O(E log V) — Companies: Flipkart, Microsoft**
+
+```cpp
+// Time: O(E * log(V))
+// E = number of edges, V = number of vertices
+class Solution {
+public:
+    vector<int> dijkstra(int V, vector<vector<int>> adj[], int S) {
+        set<pair<int,int>> pq;           // {distance, node}
+        vector<int> result(V, INT_MAX);
+
+        result[S] = 0;
+        pq.insert({0, S});
+
+        while (!pq.empty()) {
+            auto& it   = *pq.begin();
+            int d      = it.first;
+            int node   = it.second;
+            pq.erase(it);
+
+            for (auto& vec : adj[node]) {
+                int adjNode = vec[0];
+                int dist    = vec[1];
+
+                if (d + dist < result[adjNode]) {
+                    if (result[adjNode] != INT_MAX)
+                        pq.erase({result[adjNode], adjNode});
+
+                    result[adjNode] = d + dist;
+                    pq.insert({d + dist, adjNode});
+                }
+            }
+        }
+        return result;
+    }
+};
+```
+
+<Warning>
+Dijkstra does not work with negative edge weights. Use Bellman-Ford for graphs that may contain negative edges.
+</Warning>
+
+## Algorithm groups
+
+<AccordionGroup>
+  <Accordion title="Shortest path algorithms">
+    | Algorithm | Graph type | Time complexity | Negative edges |
+    |-----------|-----------|-----------------|----------------|
+    | BFS | Unweighted | O(V + E) | N/A |
+    | Dijkstra | Weighted, non-negative | O(E log V) | No |
+    | Bellman-Ford | Weighted | O(V × E) | Yes |
+    | Floyd-Warshall | All pairs | O(V³) | Yes (no neg cycle) |
+    | SPFA | Weighted | O(V × E) worst | Yes |
+
+    **When to use which:**
+    - Unweighted grid/graph → BFS (each edge has cost 1).
+    - Weighted, non-negative → Dijkstra with a min-heap.
+    - Negative edges or detect negative cycles → Bellman-Ford.
+    - All-pairs shortest paths with small V → Floyd-Warshall.
+    - K-stop constraint (e.g., Cheapest Flights) → Modified Bellman-Ford with K relaxation rounds.
+  </Accordion>
+
+  <Accordion title="Cycle detection">
+    | Graph type | Algorithm | Key detail |
+    |-----------|-----------|------------|
+    | Undirected (DFS) | DFS + parent tracking | Back edge to non-parent = cycle |
+    | Undirected (BFS) | BFS + visited set | Cross edge to visited = cycle |
+    | Undirected (DSU) | Union-Find | Union returns false = cycle |
+    | Directed (DFS) | Color technique | Gray node visited again = cycle |
+    | Directed (BFS) | Kahn's algorithm | If processed nodes < V, cycle exists |
+
+    The **color technique** for directed graphs uses three states:
+    - `0` = unvisited
+    - `1` = in current DFS path (gray)
+    - `2` = fully processed (black)
+
+    A back edge to a gray node indicates a cycle.
+
+    ```cpp
+    bool dfs(int node, vector<int>& color, vector<vector<int>>& adj) {
+        color[node] = 1;  // gray
+        for (int nei : adj[node]) {
+            if (color[nei] == 1) return true;   // back edge
+            if (color[nei] == 0 && dfs(nei, color, adj)) return true;
+        }
+        color[node] = 2;  // black
+        return false;
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Topological sort">
+    Topological sort is only valid for **Directed Acyclic Graphs (DAGs)**. Two approaches:
+
+    **Kahn's Algorithm (BFS-based)**
+    1. Compute in-degree for every node.
+    2. Enqueue all nodes with in-degree 0.
+    3. Process queue: decrement neighbors' in-degrees, enqueue when in-degree reaches 0.
+    4. If processed count < V, a cycle exists.
+
+    **DFS-based**
+    1. Run DFS; push each node to a stack after all its neighbors are visited.
+    2. Pop the stack to get topological order.
+
+    **Common problems using topological sort:**
+    - Course Schedule I & II
+    - Alien Dictionary
+    - Sequence Reconstruction
+    - Find Eventual Safe States (reverse topological)
+    - Longest Path With Different Adjacent Characters
+
+    <Tip>
+    Prefer Kahn's algorithm when you also need to detect cycles or count levels (useful for problems involving prerequisites with layers).
+    </Tip>
+  </Accordion>
+</AccordionGroup>
+
+## Tips
+
+<Steps>
+  <Step title="Model the problem as a graph first">
+    Identify nodes, edges, and whether the graph is directed or undirected. Many problems (word ladder, course schedule) are not presented as explicit graphs — you must construct them.
+  </Step>
+  <Step title="Choose the right traversal">
+    Use BFS for shortest paths in unweighted graphs and level-order processing. Use DFS for connectivity, cycle detection, and topological sort. Use Dijkstra for weighted shortest paths.
+  </Step>
+  <Step title="Always track visited state">
+    Failing to mark nodes as visited leads to infinite loops. For grids, mutate the cell in place (e.g., set to `'$'`) to avoid an extra visited array.
+  </Step>
+  <Step title="Union-Find is often simpler than DFS for connectivity">
+    For problems asking whether two nodes are connected, or for counting connected components dynamically, Union-Find with path compression runs near O(1) per query.
+  </Step>
+</Steps>
+
+<Info>
+Related topics: [Tree](/topics/tree) for tree-specific graph problems, [Dynamic Programming](/topics/dynamic-programming) for DP on DAGs, [Heap](/topics/heap) for priority-queue-based algorithms like Dijkstra and Prim's.
+</Info>

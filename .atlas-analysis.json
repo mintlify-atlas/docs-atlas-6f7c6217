@@ -1,0 +1,91 @@
+{
+  "projectType": "general",
+  "projectName": "Interview DS Algo",
+  "projectDescription": "A comprehensive, topic-organized collection of C++ solutions to LeetCode and coding interview problems, tagged by company, frequency, and video explanation.",
+  "theme": "maple",
+  "primaryColor": "#848c8e",
+  "lightColor": "#11161e",
+  "darkColor": "#cfd0d2",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guide",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "how-to-use",
+              "company-tags"
+            ]
+          },
+          {
+            "group": "Linear Data Structures",
+            "pages": [
+              "topics/arrays",
+              "topics/strings",
+              "topics/linked-list",
+              "topics/stack",
+              "topics/queue"
+            ]
+          },
+          {
+            "group": "Trees & Graphs",
+            "pages": [
+              "topics/tree",
+              "topics/graph",
+              "topics/trie",
+              "topics/segment-tree"
+            ]
+          },
+          {
+            "group": "Algorithms & Techniques",
+            "pages": [
+              "topics/dynamic-programming",
+              "topics/backtracking",
+              "topics/greedy",
+              "topics/sliding-window",
+              "topics/two-pointers",
+              "topics/bit-manipulation"
+            ]
+          },
+          {
+            "group": "Advanced Topics",
+            "pages": [
+              "topics/heap",
+              "topics/hashmap-hashset",
+              "topics/mathematical",
+              "topics/design",
+              "topics/line-sweep",
+              "topics/recursion"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "900+ LeetCode and coding interview problems solved in C++",
+    "Company tags on every solution (Google, Amazon, Microsoft, etc.)",
+    "Topic-organized structure covering 20+ DSA categories",
+    "Video explanations in Hinglish by codestorywithMIK",
+    "Frequency tags indicating how often a problem is asked",
+    "Sub-topic categorization within each major topic (e.g., 1-D DP, DP on Grids, LIS variants)",
+    "Solutions with time and space complexity analysis",
+    "Multiple approaches per problem (brute force to optimal)"
+  ],
+  "publicApiSurface": [
+    "Arrays — prefix sum, two pointers, binary search, sliding window, intervals",
+    "Dynamic Programming — 1-D DP, DP on grids, DP on strings, LIS variants, knapsack, MCM",
+    "Graph — BFS/DFS, Dijkstra, Bellman-Ford, Floyd-Warshall, Union-Find, topological sort",
+    "Tree — BST, N-ary tree, LCA, Morris traversal, traversal techniques",
+    "Backtracking — permutations, combinations, subsets, N-Queens, Sudoku Solver",
+    "Greedy — interval scheduling, activity selection, job scheduling",
+    "Sliding Window — fixed and variable window patterns",
+    "Heap — top-K problems, median finding, scheduling",
+    "Trie — prefix trees, word search, autocomplete",
+    "Segment Tree — range queries, lazy propagation",
+    "Bit Manipulation — XOR tricks, bitmask DP",
+    "Design — LRU/LFU cache, data streams, system design components"
+  ]
+}

@@ -1,0 +1,195 @@
+---
+title: "Recursion"
+description: "Recursion is the foundation of DFS, backtracking, divide-and-conquer, and tree problems. Master the recursive mindset before tackling dynamic programming."
+---
+
+Recursion is not just a technique — it is a way of thinking. Once you can define a problem in terms of a smaller version of itself, you unlock DFS, backtracking, divide-and-conquer, and eventually dynamic programming. Almost every tree and graph problem is recursive at its core.
+
+<CardGroup cols={2}>
+  <Card title="Tree" icon="tree" href="/topics/tree">
+    Most tree problems are recursive DFS
+  </Card>
+  <Card title="Backtracking" icon="rotate-left" href="/topics/backtracking">
+    Recursion + pruning = backtracking
+  </Card>
+  <Card title="Dynamic Programming" icon="brain" href="/topics/dynamic-programming">
+    Memoize recursion = top-down DP
+  </Card>
+  <Card title="Graph" icon="diagram-project" href="/topics/graph">
+    DFS on graphs is recursive traversal
+  </Card>
+</CardGroup>
+
+---
+
+## How to Solve Any Recursive Problem
+
+<Steps>
+  <Step title="Define the problem in terms of a smaller subproblem">
+    Write a clear English sentence: "To solve `f(n)`, I solve `f(n-1)` and combine the result." This is your recurrence relation.
+
+    ```
+    mergeSort(arr, l, r) = merge(
+        mergeSort(arr, l, mid),
+        mergeSort(arr, mid+1, r)
+    )
+    ```
+  </Step>
+  <Step title="Identify base cases — when to stop">
+    Base cases are the simplest inputs that can be answered directly without recursion. Missing or incorrect base cases cause infinite recursion.
+
+    ```cpp
+    if (l >= r) return; // single element or empty — already sorted
+    ```
+  </Step>
+  <Step title="Trust the recursive leap of faith">
+    Assume your recursive call works correctly on the smaller subproblem. Do not trace through the full recursion in your head — trust the definition and focus on the current level only.
+  </Step>
+  <Step title="Build the answer from subproblem results">
+    Combine the results returned by recursive calls to produce the answer for the current call. This is where the merge step, the accumulation, or the decision logic lives.
+
+    ```cpp
+    merge(arr, l, mid, r); // combine the two sorted halves
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Key Patterns
+
+### Divide and Conquer
+
+Split the problem into independent subproblems, solve each recursively, then merge the results. Time complexity follows the Master Theorem.
+
+**Problems:** Merge Sort, Quick Sort, Different Ways to Add Parentheses, Special Binary String
+
+### Tree Recursion (DFS)
+
+The recursive structure of a binary tree directly mirrors the call stack. Process the current node, recurse left, recurse right (or any order depending on the problem).
+
+**Problems:** Construct String from Binary Tree, Flatten BST to Sorted List, any tree traversal
+
+### Mathematical Recursion
+
+Use the self-similar mathematical structure of the problem to define the recurrence.
+
+- **Tower of Hanoi:** `hanoi(n, src, dst, aux)` = move `n-1` disks to `aux`, move disk `n` to `dst`, move `n-1` disks from `aux` to `dst`
+- **K-th Symbol in Grammar:** the Nth row is built from the (N-1)th row — find the parent and flip if needed
+- **Power Set:** `powerSet(n)` = `powerSet(n-1)` ∪ each subset of `powerSet(n-1)` with element `n` added
+
+---
+
+## Key Problems
+
+<CardGroup cols={2}>
+  <Card title="Merge Sort" icon="sort" href="/topics/recursion">
+    Classic divide-and-conquer — Amazon, Microsoft, Paytm
+  </Card>
+  <Card title="Quick Sort" icon="bolt" href="/topics/recursion">
+    In-place divide-and-conquer with pivot
+  </Card>
+  <Card title="Tower of Hanoi" icon="chess-rook" href="/topics/recursion">
+    Three-peg recursive decomposition
+  </Card>
+  <Card title="Power Set" icon="list-check" href="/topics/recursion">
+    Generate all subsets recursively
+  </Card>
+  <Card title="K-th Symbol in Grammar" icon="code" href="/topics/recursion">
+    Navigate the recursion tree without building it
+  </Card>
+  <Card title="Integer to English Words" icon="font" href="/topics/recursion">
+    Recursive grouping by thousands — Amazon, Meta
+  </Card>
+  <Card title="Regular Expression Matching" icon="asterisk" href="/topics/recursion">
+    Recursive match with memoization
+  </Card>
+  <Card title="Rat in a Maze" icon="grip-dots" href="/topics/recursion">
+    Grid DFS — foundation for backtracking
+  </Card>
+</CardGroup>
+
+---
+
+## Worked Example: Merge Sort
+
+> **Company Tags:** Paytm, Amazon, Microsoft, Snapdeal, Oracle, Goldman Sachs, Wipro
+
+Merge Sort is the textbook divide-and-conquer algorithm. It sorts by recursively halving the array and merging sorted halves.
+
+- **Time complexity:** O(n log n) — log n levels, O(n) work per level
+- **Space complexity:** O(n) — temporary arrays during merge
+
+```cpp
+// Company Tags: Paytm, Amazon, Microsoft, Snapdeal, Oracle, Goldman Sachs
+// GfG: https://www.geeksforgeeks.org/problems/merge-sort/1
+
+class Solution {
+public:
+    // Merge two sorted halves: arr[l..m] and arr[m+1..r]
+    void merge(int arr[], int l, int m, int r) {
+        int n1 = m - l + 1;
+        int n2 = r - m;
+
+        int L[n1], R[n2]; // temporary arrays
+
+        // Copy each half into temporary storage
+        for (int i = 0; i < n1; i++) L[i] = arr[l + i];
+        for (int j = 0; j < n2; j++) R[j] = arr[m + 1 + j];
+
+        // Merge back into arr[l..r]
+        int i = 0, j = 0, k = l;
+        while (i < n1 && j < n2) {
+            if (L[i] <= R[j]) arr[k++] = L[i++];
+            else               arr[k++] = R[j++];
+        }
+        while (i < n1) arr[k++] = L[i++]; // remaining left
+        while (j < n2) arr[k++] = R[j++]; // remaining right
+    }
+
+    // Recursively sort arr[l..r]
+    void mergeSort(int arr[], int l, int r) {
+        if (l >= r) return; // base case: 0 or 1 element
+
+        int mid = l + (r - l) / 2; // avoids integer overflow vs (l+r)/2
+
+        mergeSort(arr, l, mid);      // sort left half
+        mergeSort(arr, mid + 1, r);  // sort right half
+        merge(arr, l, mid, r);       // merge sorted halves
+    }
+};
+```
+
+**Recursion tree** for `[5, 3, 8, 1]`:
+
+```
+mergeSort([5,3,8,1])
+├── mergeSort([5,3])
+│   ├── mergeSort([5])  → [5]
+│   ├── mergeSort([3])  → [3]
+│   └── merge           → [3,5]
+├── mergeSort([8,1])
+│   ├── mergeSort([8])  → [8]
+│   ├── mergeSort([1])  → [1]
+│   └── merge           → [1,8]
+└── merge               → [1,3,5,8]
+```
+
+<Tip>
+  If a recursive solution is correct but too slow, it likely has **overlapping subproblems**. Add memoization (a cache of results by input) to convert it to top-down dynamic programming. Merge Sort does not have overlapping subproblems, but problems like Regular Expression Matching and K-th Symbol in Grammar do.
+</Tip>
+
+---
+
+## Recursion vs Iteration
+
+| Aspect | Recursion | Iteration |
+|--------|-----------|-----------|
+| Readability | Often cleaner for tree/graph | More explicit state management |
+| Stack | Uses call stack — risk of overflow | Explicit stack if needed |
+| Memoization | Natural with a cache map | Requires bottom-up DP table |
+| Tail calls | Not optimized in C++ by default | Loop is always O(1) stack |
+
+<Note>
+  Deep recursion (depth > ~10,000) risks **stack overflow** in C++. For problems with very large inputs, convert to an explicit stack on the heap or use an iterative approach.
+</Note>

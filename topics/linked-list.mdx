@@ -1,0 +1,171 @@
+---
+title: "Linked List"
+description: "Linked list techniques including reversal, Floyd's cycle detection, merge operations, and doubly linked list patterns — with real examples from the repo."
+---
+
+Linked list problems test your ability to manipulate pointers carefully. They appear frequently at top companies because they are hard to solve without understanding memory and pointer semantics. The repo covers ~46 problems spanning reversal, merging, cycle detection, and deep copying.
+
+## Sub-topics
+
+<CardGroup cols={2}>
+  <Card title="Reversal Techniques" icon="rotate">
+    Reverse a list iteratively or recursively, reverse in k-groups, or reverse between two positions. Iterative reversal with `prev/curr/next` pointers is the most interview-reliable approach.
+  </Card>
+  <Card title="Two Pointers — Floyd's Cycle" icon="circle-nodes">
+    Use slow and fast pointers to detect cycles, find the middle node, find the start of a cycle (Linked List Cycle II), and find the intersection of two lists.
+  </Card>
+  <Card title="Merge Operations" icon="code-merge">
+    Merge two or K sorted lists using recursion or a divide-and-conquer approach. The two-list merge is the building block for merge sort on linked lists.
+  </Card>
+  <Card title="Doubly Linked List" icon="arrows-left-right">
+    Extend singly linked list nodes with a `prev` pointer. Used in LRU Cache design and "First Non-Repeating Character in a Stream" problems.
+  </Card>
+  <Card title="Deep Copy" icon="copy">
+    Clone a list that contains random pointers using either a hashmap (O(n) space) or an interleaving technique (O(1) extra space).
+  </Card>
+  <Card title="In-place Reordering" icon="arrow-right-arrow-left">
+    Reorder, partition, split, and rearrange nodes without allocating new nodes. Covers Reorder List, Odd Even Linked List, and Partition List.
+  </Card>
+</CardGroup>
+
+## Key Problems
+
+| Problem | Pattern | Companies |
+|---|---|---|
+| Reverse Linked List | Iterative / recursive reversal | Paytm, VMWare, Zoho, Amazon, Microsoft, Samsung, Goldman Sachs, Adobe |
+| Merge k Sorted Lists | Divide and conquer / priority queue | VMWare, Amazon, Uber, Google, Twitter, LinkedIn, Facebook, Microsoft |
+| Copy List with Random Pointer | HashMap / interleaving clone | Morgan Stanley, Amazon, Microsoft, MakeMyTrip, Ola Cabs |
+| Linked List Cycle II | Floyd's two-pointer | Amazon, Microsoft, Google |
+| Reverse Nodes in k-Group | Reversal + recursion | Amazon, Microsoft, Google |
+| Reorder List | Find middle + reverse + merge | Amazon, Facebook |
+| Palindrome Linked List | Find middle + reverse second half | Amazon, Facebook, Adobe |
+| Remove Nth Node From End | Two-pointer gap technique | Amazon, Microsoft, Adobe |
+| Merge Two Sorted Lists | Recursive merge | Amazon, Microsoft, Adobe, Google |
+| LRU Cache (design) | Doubly linked list + hashmap | Amazon, Microsoft, Google, Facebook |
+| Flatten a Multilevel Doubly Linked List | DFS / iteration | Amazon, Microsoft |
+| Swap Nodes in Pairs | In-place pointer manipulation | Amazon, Microsoft |
+
+## Technique Patterns
+
+### Iterative Reversal — Reverse Linked List
+
+Maintain three pointers (`prev`, `head`, `next`). At each step, flip the `next` pointer, then advance all three. This runs in O(n) time and O(1) space.
+
+```cpp
+// T.C : O(n)   S.C : O(1)
+// Company Tags: Paytm, VMWare, Zoho, Amazon, Microsoft, Samsung, Goldman Sachs, Adobe
+ListNode* reverseList(ListNode* head) {
+    ListNode* prev = nullptr;
+
+    while (head != nullptr) {
+        ListNode* next = head->next;
+        head->next     = prev;
+        prev           = head;
+        head           = next;
+    }
+
+    return prev;
+}
+```
+
+### Divide and Conquer Merge — Merge k Sorted Lists
+
+Recursively split the list array in half and merge pairs. Each level does O(k*n) work and there are O(log k) levels, giving O(k*n*log k) overall.
+
+```cpp
+// T.C : O(k*n*log k)   S.C : O(log k) recursion stack
+// Company Tags: VMWare, Amazon, Uber, Google, Twitter, LinkedIn, Facebook, Microsoft
+ListNode* mergeTwoSortedLists(ListNode* l1, ListNode* l2) {
+    if (!l1) return l2;
+    if (!l2) return l1;
+
+    if (l1->val <= l2->val) {
+        l1->next = mergeTwoSortedLists(l1->next, l2);
+        return l1;
+    } else {
+        l2->next = mergeTwoSortedLists(l1, l2->next);
+        return l2;
+    }
+}
+
+ListNode* partitionAndMerge(int start, int end, vector<ListNode*>& lists) {
+    if (start == end) return lists[start];
+    if (start > end)  return nullptr;
+
+    int mid       = start + (end - start) / 2;
+    ListNode* l1  = partitionAndMerge(start, mid, lists);
+    ListNode* l2  = partitionAndMerge(mid + 1, end, lists);
+
+    return mergeTwoSortedLists(l1, l2);
+}
+
+ListNode* mergeKLists(vector<ListNode*>& lists) {
+    int n = lists.size();
+    if (n == 0) return nullptr;
+    return partitionAndMerge(0, n - 1, lists);
+}
+```
+
+### O(1)-Space Deep Copy — Copy List with Random Pointer
+
+Interleave cloned nodes with the original list to set random pointers without a hashmap, then separate the two lists.
+
+```cpp
+// T.C : O(n)   S.C : O(1) extra
+// Company Tags: Morgan Stanley, Amazon, Microsoft, MakeMyTrip, Ola Cabs
+Node* copyRandomList(Node* head) {
+    if (!head) return nullptr;
+
+    // Step 1: interleave clones
+    Node* curr = head;
+    while (curr) {
+        Node* clone  = new Node(curr->val);
+        clone->next  = curr->next;
+        curr->next   = clone;
+        curr         = clone->next;
+    }
+
+    // Step 2: set random pointers on clones
+    curr = head;
+    while (curr && curr->next) {
+        if (curr->random)
+            curr->next->random = curr->random->next;
+        curr = curr->next->next;
+    }
+
+    // Step 3: separate the two lists
+    Node* newHead = head->next;
+    Node* newCurr = newHead;
+    curr = head;
+    while (curr && newCurr) {
+        curr->next    = curr->next ? curr->next->next : nullptr;
+        newCurr->next = newCurr->next ? newCurr->next->next : nullptr;
+        curr    = curr->next;
+        newCurr = newCurr->next;
+    }
+
+    return newHead;
+}
+```
+
+## Tips for Interviews
+
+<Tip>
+Always draw the pointer state before and after your operations on a whiteboard or scratch paper. Linked list bugs almost always come from updating pointers in the wrong order — visualizing first prevents this.
+</Tip>
+
+<Tip>
+For "find the middle of a linked list", use slow/fast pointers: slow moves one step, fast moves two steps. When fast reaches the end, slow is at the middle. This is the building block for palindrome check, merge sort on linked lists, and reorder list.
+</Tip>
+
+<Tip>
+When reversing in k-groups or between positions, always handle the edge case where the remaining nodes are fewer than k before you start reversing — iterating past the end and then trying to reconnect is a common source of bugs.
+</Tip>
+
+<Tip>
+The O(1)-space clone (interleaving) technique for Copy List with Random Pointer is impressive in interviews. Know both approaches (hashmap and interleaving) and be ready to explain the trade-offs.
+</Tip>
+
+<Tip>
+LRU Cache combines a doubly linked list (for O(1) removal from any position) with an unordered_map (for O(1) key lookup). This is a canonical design problem — practice implementing both components from scratch.
+</Tip>

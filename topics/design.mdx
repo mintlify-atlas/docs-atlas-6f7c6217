@@ -1,0 +1,186 @@
+---
+title: "Design Problems"
+description: "Build efficient data structures from scratch — LRU/LFU caches, time-based stores, and O(1) structures that appear constantly at FAANG interviews."
+---
+
+Design problems at the coding interview level test your ability to combine multiple data structures to meet specific time and space constraints. Unlike system design, the focus here is on **implementing the data structure itself** — every operation must meet the stated complexity requirement.
+
+<CardGroup cols={2}>
+  <Card title="Heap / Priority Queue" icon="layer-group" href="/topics/heap">
+    Related: Median from Data Stream
+  </Card>
+  <Card title="HashMap & HashSet" icon="hashtag" href="/topics/hashmap-hashset">
+    Related: O(1) lookup in cache design
+  </Card>
+  <Card title="Linked List" icon="link" href="/topics/linked-list">
+    Related: doubly linked list for LRU/LFU
+  </Card>
+  <Card title="Stack" icon="bars-stacked" href="/topics/stack">
+    Related: stack/queue conversion problems
+  </Card>
+</CardGroup>
+
+---
+
+## Problem Categories
+
+<AccordionGroup>
+  <Accordion title="Cache Design — LRU Cache, LFU Cache">
+    Cache problems are among the **most frequently asked design problems** at FAANG. You must implement `get` and `put` in O(1).
+
+    **LRU Cache** — Least Recently Used eviction:
+    - **Data structure:** doubly linked list (order of use) + hash map (key → list node)
+    - On `get`: move accessed node to front of list
+    - On `put`: insert at front; if over capacity, evict from back
+
+    **LFU Cache** — Least Frequently Used eviction:
+    - **Data structure:** min-heap or doubly linked list per frequency + two hash maps
+    - Track both frequency and recency (for tie-breaking among same-frequency keys)
+
+    <Note>
+      LRU is extremely common. Practice until you can implement the doubly linked list + hashmap from scratch in under 20 minutes.
+    </Note>
+
+    **Problems:** LRU Cache, LFU Cache, Design Movie Rental System
+  </Accordion>
+
+  <Accordion title="Stream and Time-Based Structures">
+    These problems require storing historical data and querying it efficiently.
+
+    - **Find Median from Data Stream** — two heaps (max-heap for lower half, min-heap for upper half)
+    - **Time Based Key-Value Store** — hash map + sorted list (binary search for largest timestamp ≤ query)
+    - **Snapshot Array** — copy-on-write per index with binary search on version history
+
+    **Problems:** Find Median from Data Stream, Time Based Key-Value Store, Snapshot Array, Most Frequent IDs
+  </Accordion>
+
+  <Accordion title="Stack and Queue Conversions">
+    Classic interview staples testing your understanding of LIFO vs FIFO behaviour.
+
+    - **Queue using two stacks** — amortized O(1) dequeue: lazy transfer from inbox to outbox stack
+    - **Stack using two queues** — O(n) push or O(n) pop depending on approach
+
+    ```cpp
+    // Queue using two stacks — amortized O(1) pop
+    class MyQueue {
+        stack<int> inbox, outbox;
+    public:
+        void push(int x) { inbox.push(x); }
+        int pop() {
+            if (outbox.empty())
+                while (!inbox.empty()) { outbox.push(inbox.top()); inbox.pop(); }
+            int val = outbox.top(); outbox.pop(); return val;
+        }
+        int peek() {
+            if (outbox.empty())
+                while (!inbox.empty()) { outbox.push(inbox.top()); inbox.pop(); }
+            return outbox.top();
+        }
+        bool empty() { return inbox.empty() && outbox.empty(); }
+    };
+    ```
+
+    **Problems:** Implement Queue using Stacks, Implement Stack using Queues, Max Stack, Min Stack
+  </Accordion>
+
+  <Accordion title="O(1) / Randomized Data Structures">
+    Problems that require all three of insert, delete, and getRandom in O(1) combine a hash map with an array.
+
+    - **Array** gives O(1) random access for `getRandom` (pick a random index)
+    - **Hash map** (element → index) gives O(1) lookup for `insert` and `delete`
+    - **Swap-and-pop** trick: to delete, swap the target with the last element, then pop — O(1) array delete
+
+    **Problems:** Insert Delete GetRandom O(1), Insert Delete GetRandom O(1) — Duplicates Allowed, All O(1) Data Structure
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Key Problems
+
+<CardGroup cols={2}>
+  <Card title="LRU Cache" icon="clock-rotate-left" href="/topics/design">
+    Doubly linked list + hashmap — Adobe, Microsoft, Amazon
+  </Card>
+  <Card title="LFU Cache" icon="star" href="/topics/design">
+    Frequency-ordered eviction — Google, Meta
+  </Card>
+  <Card title="Find Median from Data Stream" icon="wave-pulse" href="/topics/design">
+    Two heaps with balance invariant
+  </Card>
+  <Card title="Time Based Key-Value Store" icon="calendar-clock" href="/topics/design">
+    Binary search on timestamp history
+  </Card>
+  <Card title="Insert Delete GetRandom O(1)" icon="dice" href="/topics/design">
+    Array + hashmap for true O(1) random
+  </Card>
+  <Card title="Design Underground System" icon="train-subway" href="/topics/design">
+    Two maps tracking check-ins and travel stats
+  </Card>
+  <Card title="Snapshot Array" icon="camera" href="/topics/design">
+    Copy-on-write + binary search on versions
+  </Card>
+  <Card title="Design Browser History" icon="arrow-left" href="/topics/design">
+    Doubly linked list or vector with cursor
+  </Card>
+</CardGroup>
+
+---
+
+## Worked Example: LRU Cache
+
+> **Company Tags:** Adobe, Microsoft, Amazon, Citygroup, Twitch
+
+Implement a cache with O(1) `get` and `put`, evicting the **least recently used** key when capacity is exceeded.
+
+**Strategy:** A `std::list<int>` (doubly linked list) maintains insertion/access order — most recent at front, least recent at back. A `map<int, pair<iterator, value>>` gives O(1) lookup of any key's list node.
+
+```cpp
+// Company Tags: Adobe, Microsoft, Amazon, Citygroup, Twitch
+// Leetcode: https://leetcode.com/problems/lru-cache/
+
+class LRUCache {
+public:
+    list<int> dll;                                   // stores keys; front = MRU, back = LRU
+    map<int, pair<list<int>::iterator, int>> cache;  // key -> {list node, value}
+    int capacity;
+
+    LRUCache(int capacity) : capacity(capacity) {}
+
+    void makeMostRecentlyUsed(int key) {
+        dll.erase(cache[key].first);   // remove from current position
+        dll.push_front(key);           // move to front (most recent)
+        cache[key].first = dll.begin();
+    }
+
+    int get(int key) {
+        if (!cache.count(key)) return -1;
+        makeMostRecentlyUsed(key);
+        return cache[key].second;
+    }
+
+    void put(int key, int value) {
+        if (cache.count(key)) {
+            cache[key].second = value;
+            makeMostRecentlyUsed(key);
+        } else {
+            dll.push_front(key);
+            cache[key] = {dll.begin(), value};
+            capacity--;
+        }
+
+        if (capacity < 0) {
+            // evict least recently used (back of list)
+            cache.erase(dll.back());
+            dll.pop_back();
+            capacity++;
+        }
+    }
+};
+```
+
+**Why doubly linked list?** `std::list` supports O(1) erase given an iterator, and O(1) push to front/back. The map stores the iterator directly, so `makeMostRecentlyUsed` runs in O(1) (plus O(log n) for `map` — use `unordered_map` for true O(1)).
+
+<Tip>
+  For LFU Cache, maintain a separate doubly linked list **per frequency level** plus a `minFreq` pointer. On access, move the node from its current frequency list to `freq+1` list and update `minFreq` if the old list becomes empty.
+</Tip>
